@@ -1,0 +1,120 @@
+@use './default/sizes' as s;
+@use './default/colors' as c;
+@use './default/mixins' as m;
+
+nav {
+    position: relative;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    min-height: s.$size04;
+
+    & .action-container {
+        display: flex;
+        gap: s.$size-02;
+
+        & .btn-round {
+            all: unset;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            width: s.$size04;
+            height: s.$size04;
+
+            background-color: c.$black-02;
+            border: 1px solid c.$black-03;
+
+            border-radius: 100%;
+
+            cursor: pointer;
+
+            &:hover {
+                background-color: c.$black-03;
+            }
+        }
+    }
+
+    & .logo-container {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+
+        display: flex;
+        gap: s.$size;
+        align-items: center;
+
+        & > span {
+            display: none;
+
+            font-size: s.$size02;
+
+            @include m.media-min--width(886px) {
+                display: block;
+            }
+        }
+    }
+
+    & .profile-container {
+        display: flex;
+        align-items: center;
+        gap: s.$size-01;
+
+        & .btn-icon-only {
+            all: unset;
+
+            cursor: pointer;
+
+            &:hover {
+                & > img {
+                    transform: rotate(180deg);
+
+                    transition: 1s;
+                }
+            }
+
+            & > img {
+                transition: 0s;
+            }
+        }
+
+        & .btn {
+            all: unset;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: s.$size-01;
+
+            padding: s.$size-02;
+
+            background-color: c.$black-02;
+            border: 1px solid c.$black-03;
+
+            border-radius: 100px;
+
+            cursor: pointer;
+
+            @include m.media-min--width(630px) {
+                gap: s.$size;
+
+                padding: s.$size-02 s.$size01;
+            }
+
+            &:hover {
+                background-color: c.$black-03;
+            }
+
+            & > span {
+                display: none;
+
+                @include m.media-min--width(630px) {
+                    display: block;
+                }
+            }
+        }
+    }
+}
