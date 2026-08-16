@@ -1,19 +1,19 @@
 <script setup lang="ts">
-const shortcuts = [
-    {
-        link: "https://www.twitch.tv/kodurooo",
-        title: "Twitch",
-        icon: "twitch.svg",
-        iconAlt: "Twitch icon",
-        color: "#a172f7",
-    },
-];
+const shortcuts: Ref<{ link: string; title: string; icon: string; iconAlt: string; color: string }[]> = ref([]);
+
+onMounted(() => {
+    const shortcutsData = localStorage.getItem("moooboard:shortcuts");
+
+    if (shortcutsData) {
+        shortcuts.value = JSON.parse(shortcutsData);
+    }
+});
 </script>
 
 <template>
     <div class="page">
         <Navbar />
-        <ShortcutBox :shortcuts="shortcuts" />
+        <ShortcutBox v-if="shortcuts.length > 0" :shortcuts="shortcuts" />
     </div>
 </template>
 
