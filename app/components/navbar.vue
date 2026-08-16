@@ -4,6 +4,7 @@
             <button
                 class="btn-round"
                 type="button"
+                title="Undo"
             >
                 <img
                     src="/images/arrow-undo.svg"
@@ -13,6 +14,7 @@
             <button
                 class="btn-round"
                 type="button"
+                title="Redo"
             >
                 <img
                     src="/images/arrow-redo.svg"

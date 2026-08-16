@@ -1,6 +1,10 @@
-@use './default/sizes' as s;
-@use './default/colors' as c;
-@use './default/mixins' as m;
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     position: relative;
@@ -20,12 +24,10 @@ body {
 
 // Font themes
 
-.font01 {
-    font-family: 'Micro 5';
-}
-
-& .font02 {
-    font-family: 'Micro 5';
+.font01,
+.font02,
+.font03 {
+    font-family: "Micro 5";
 }
 
 .theme01 {
@@ -36,16 +38,25 @@ body {
     .micro02 {
         font-size: 26px !important;
     }
+
+    .micro03 {
+        font-size: 24px !important;
+    }
 }
 
 .theme02 {
     & .font01 {
-        font-family: 'Fredoka Bold';
+        font-family: "Fredoka Bold";
         letter-spacing: 1px;
     }
 
     & .font02 {
-        font-family: 'Fredoka Medium';
+        font-family: "Fredoka Medium";
         letter-spacing: 1px;
+    }
+
+    & .font03 {
+        font-family: "Fredoka Regular";
+        letter-spacing: 0.5px;
     }
 }

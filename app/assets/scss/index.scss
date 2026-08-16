@@ -1,0 +1,11 @@
+@use "./default/sizes" as s;
+
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: s.$size04;
+
+    max-width: 2432px;
+
+    margin: 0 auto;
+}

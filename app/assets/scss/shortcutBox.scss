@@ -1,0 +1,47 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.shortcut-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: s.$size-01;
+
+    padding: s.$size;
+
+    background-color: c.$black-02;
+
+    border-radius: s.$size;
+
+    @include m.media-min--width(630px) {
+        padding: s.$size02;
+    }
+
+    .container {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: s.$size-01;
+
+        width: 100%;
+    }
+
+    .btn-round {
+        all: unset;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        min-width: s.$size04;
+        width: s.$size04;
+        height: s.$size04;
+
+        background-color: c.$black-01;
+
+        border-radius: 100%;
+
+        cursor: pointer;
+    }
+}
