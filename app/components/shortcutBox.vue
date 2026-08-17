@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Shortcut } from "~/types/shortcut";
+
 const props = defineProps<{
-    shortcuts: { link: string; title: string; icon: string; iconAlt: string; color: string }[];
+    shortcuts: { id: number; link: string; title: string; icon: string; iconAlt: string; color: string }[];
 }>();
 
 const shortcutWidth = 64;
@@ -38,11 +40,13 @@ onUnmounted(() => {
         <div class="container" id="shortcuts-container">
             <Shortcut
                 v-for="s in props.shortcuts.slice(0, shortcutsToShow)"
+                :id="s.id"
                 :link="s.link"
                 :title="s.title"
                 :icon="s.icon"
                 :iconAlt="s.iconAlt"
                 :color="s.color"
+                @delete="(e: Shortcut) => $emit('delete', e)"
             />
         </div>
         <button type="button" class="btn-round" v-if="props.shortcuts.length > shortcutsToShow">

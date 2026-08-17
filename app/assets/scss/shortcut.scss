@@ -1,31 +1,33 @@
 @use "./default/sizes" as s;
 
-.shortcut-link {
-    all: unset;
+.shortcut-container {
+    position: relative;
 
-    cursor: pointer;
+    & .shortcut-link {
+        all: unset;
 
-    &:hover {
-        & .font03 {
-            text-decoration: underline;
-        }
-    }
-
-    & .font03 {
-        max-width: 100%;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-    }
-
-    & .shortcut-container {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: s.$size-03;
 
         width: s.$size06;
+
+        cursor: pointer;
+
+        &:hover {
+            & .font03 {
+                text-decoration: underline;
+            }
+        }
+
+        & .font03 {
+            max-width: 100%;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
 
         & .shortcut {
             display: flex;
@@ -36,6 +38,36 @@
             height: s.$size06;
 
             border-radius: s.$size-02;
+        }
+    }
+
+    & .shortcut-delete {
+        all: unset;
+
+        position: absolute;
+        top: -8px;
+        right: -8px;
+
+        display: none;
+
+        cursor: pointer;
+
+        &:hover {
+            display: block;
+
+            & > img {
+                transform: rotate(10deg);
+            }
+        }
+
+        & > img {
+            transition: 0.1s;
+        }
+    }
+
+    &:has(.shortcut-link:hover) {
+        & .shortcut-delete {
+            display: block;
         }
     }
 }
