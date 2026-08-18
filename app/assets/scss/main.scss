@@ -30,6 +30,24 @@ body {
     font-family: "Micro 5";
 }
 
+.font04 {
+    font-family: "Silkscreen";
+    font-size: s.$size02;
+}
+
+.font05 {
+    font-family: "OpenSans Regular";
+}
+
+.font06 {
+    font-family: "Silkscreen";
+}
+
+.font07 {
+    font-family: "OpenSans Regular";
+    font-size: s.$size;
+}
+
 .theme01 {
     .micro01 {
         font-size: s.$size04 !important;
@@ -41,6 +59,14 @@ body {
 
     .micro03 {
         font-size: 24px !important;
+    }
+
+    .silk01 {
+        letter-spacing: -2px;
+    }
+
+    .silk02 {
+        letter-spacing: -1px;
     }
 }
 
@@ -58,5 +84,25 @@ body {
     & .font03 {
         font-family: "Fredoka Regular";
         letter-spacing: 0.5px;
+    }
+
+    & .font04 {
+        font-family: "Fredoka Medium";
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    & .font05 {
+        font-family: "Montserrat Regular";
+    }
+
+    & .font06 {
+        font-family: "Fredoka Medium";
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .font07 {
+        font-family: "Montserrat Regular";
     }
 }

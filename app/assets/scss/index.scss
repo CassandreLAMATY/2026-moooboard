@@ -1,11 +1,49 @@
 @use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
 
 .page {
+    position: relative;
+
     display: flex;
     flex-direction: column;
     gap: s.$size04;
 
     max-width: 2432px;
+    min-height: calc(100dvh - s.$size04);
 
     margin: 0 auto;
+
+    @include m.media-min--width(1920px) {
+        min-height: calc(100dvh - s.$size04 - s.$size);
+    }
+
+    & .shortcut-add {
+        all: unset;
+
+        position: fixed;
+        top: calc(100dvh - s.$size);
+        left: 50%;
+
+        display: flex;
+        align-items: center;
+        gap: s.$size-03;
+
+        padding: s.$size-03 s.$size-01 s.$size-03 s.$size;
+
+        background-color: c.$black-03;
+
+        border: 1px solid c.$black-04;
+        border-radius: 100px;
+
+        filter: drop-shadow(0 s.$size-03 s.$size-02 #08070d1f);
+
+        transform: translateX(-50%) translateY(-100%);
+
+        cursor: pointer;
+
+        &:hover {
+            background-color: c.$black-04;
+        }
+    }
 }

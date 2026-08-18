@@ -90,11 +90,17 @@ onMounted(() => {
             @undo="undoAction()"
             @redo="redoAction"
         />
+
         <ShortcutBox
             v-if="shortcuts.length > 0"
             :shortcuts="shortcuts"
             @delete="(e: Shortcut) => handleDeleteShortcut(shortcuts, e.id)"
         />
+
+        <button class="btn shortcut-add" type="button">
+            <span class="font02 micro02">Shortcut</span>
+            <img src="/images/plus-small.svg" alt="Plus icon" />
+        </button>
     </div>
 </template>
 

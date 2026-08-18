@@ -30,9 +30,11 @@ nav {
 
             border-radius: 100%;
 
-            cursor: pointer;
+            cursor: not-allowed;
 
             &.active {
+                cursor: pointer;
+
                 &:hover {
                     background-color: c.$black-03;
                 }
