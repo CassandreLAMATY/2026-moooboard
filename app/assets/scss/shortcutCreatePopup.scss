@@ -28,7 +28,7 @@
 
         width: min(100%, s.$size10);
 
-        padding: s.$size02;
+        padding: s.$size01 s.$size02 s.$size02 s.$size02;
 
         background-color: c.$black-03;
 
@@ -86,6 +86,7 @@
                             }
 
                             & > .input {
+                                box-sizing: border-box;
                                 display: flex;
                                 align-items: center;
                                 justify-content: space-between;
@@ -94,7 +95,12 @@
 
                                 background-color: c.$black-02;
 
+                                border: 1px solid c.$black-03;
                                 border-radius: s.$size-03;
+
+                                &:has(input:focus) {
+                                    border: 1px solid c.$black-04;
+                                }
 
                                 & > input {
                                     width: 100%;
@@ -198,7 +204,12 @@
 
                                         background-color: c.$black-02;
 
+                                        border: 1px solid c.$black-03;
                                         border-radius: s.$size-03;
+
+                                        &:has(input:focus) {
+                                            border: 1px solid c.$black-04;
+                                        }
 
                                         & > input {
                                             width: s.$size07;
@@ -238,6 +249,11 @@
                                     background-color: c.$black-01;
 
                                     border-radius: s.$size-02;
+
+                                    & > img {
+                                        min-width: s.$size02;
+                                        max-width: s.$size04;
+                                    }
                                 }
                             }
                         }
@@ -245,7 +261,7 @@
                         & > .icon-container {
                             display: flex;
                             flex-direction: column;
-                            gap: s.$size-02;
+                            gap: s.$size;
 
                             & > .header {
                                 display: flex;
@@ -278,7 +294,7 @@
                                         padding: s.$size-02 s.$size01;
 
                                         background-color: c.$black-04;
-                                        border: 2px solid c.$light-blue;
+                                        border: 2px solid c.$black-10;
                                         border-radius: 100px;
 
                                         cursor: pointer;
@@ -289,6 +305,34 @@
 
                                         & > span {
                                             color: c.$white;
+                                        }
+
+                                        &.favicon {
+                                            cursor: not-allowed;
+
+                                            & > span {
+                                                color: c.$black-10;
+                                            }
+                                        }
+
+                                        &.active {
+                                            cursor: pointer;
+
+                                            &.favicon {
+                                                border: 2px solid c.$light-blue;
+                                            }
+
+                                            &:hover {
+                                                background-color: c.$black-05;
+                                            }
+
+                                            &:active {
+                                                background-color: c.$black-04;
+                                            }
+
+                                            & > span {
+                                                color: c.$white;
+                                            }
                                         }
                                     }
                                 }
@@ -350,6 +394,14 @@
                 border-radius: 100px;
 
                 cursor: pointer;
+
+                &:hover {
+                    background-color: c.$black-05;
+                }
+
+                &:active {
+                    background-color: c.$black-04;
+                }
 
                 & > span {
                     color: c.$white;

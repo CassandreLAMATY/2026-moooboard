@@ -13,7 +13,7 @@ const props = defineProps<{
     <div class="shortcut-container">
         <a class="shortcut-link" :href="props.link">
             <div class="shortcut" :style="`background-color: ${props.color}`">
-                <img :src="`/images/${props.icon}`" :alt="props.iconAlt" />
+                <img :src="props.icon" :alt="props.iconAlt" />
             </div>
 
             <span class="font03 micro03">{{ props.title }}</span>

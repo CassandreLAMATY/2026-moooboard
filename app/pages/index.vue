@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Shortcut } from "~/types/shortcut";
 
+const shortcutCreateIsOpen = ref(false);
+
 const undoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
 const redoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
 
@@ -52,28 +54,6 @@ function handleDeleteShortcut(scts: Shortcut[], id: number) {
 }
 
 onMounted(() => {
-    localStorage.setItem(
-        "moooboard:shortcuts",
-        JSON.stringify([
-            {
-                id: 0,
-                title: "Twitch",
-                icon: "twitch.svg",
-                iconAlt: "Twitch icon",
-                link: "https://www.twitch.tv/kodurooo",
-                color: "#FF0000",
-            },
-            {
-                id: 1,
-                title: "Instagram",
-                icon: "twitch.svg",
-                iconAlt: "Twitch icon",
-                link: "https://www.twitch.tv/kodurooo",
-                color: "#00FF00",
-            },
-        ]),
-    );
-
     const shortcutsData = localStorage.getItem("moooboard:shortcuts");
 
     if (shortcutsData) {
@@ -97,10 +77,16 @@ onMounted(() => {
             @delete="(e: Shortcut) => handleDeleteShortcut(shortcuts, e.id)"
         />
 
-        <button class="btn shortcut-add" type="button">
+        <button class="btn shortcut-add" type="button" @click="shortcutCreateIsOpen = true">
             <span class="font02 micro02">Shortcut</span>
             <img src="/images/plus-small.svg" alt="Plus icon" />
         </button>
+
+        <ShortcutCreatePopup
+            v-if="shortcutCreateIsOpen"
+            @close="shortcutCreateIsOpen = false"
+            @submit="(e) => (shortcuts = e)"
+        />
     </div>
 </template>
 

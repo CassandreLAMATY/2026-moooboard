@@ -1,25 +1,109 @@
 <script setup lang="ts">
+import { shortcutAddressSchema, shortcutTitleSchema } from "~/schemas/shortcutSchemas";
+import type { Shortcut } from "~/types/shortcut";
+
+const emit = defineEmits<{
+    (event: "submit", payload: Shortcut[]): void;
+    (event: "close"): void;
+}>();
+
 const isAdvancedActive = ref(true);
 
 const title = ref("");
 const address = ref("");
 const backgroundColor = ref("151419");
+const iconAddress = ref("/images/open-link.svg");
 
 const titleIsValid = ref(false);
 const addressIsValid = ref(false);
-const backgroundColorIsValid = ref(false);
 
-const titleError = ref("erreur danger méchant");
+const titleError = ref("");
 const addressError = ref("");
+
+const backgroundColorRegex = /[^a-fA-F0-9]/g;
+
+function submit() {
+    if (titleIsValid.value && addressIsValid.value) {
+        const shortcutsData = localStorage.getItem("moooboard:shortcuts");
+
+        if (shortcutsData) {
+            const shortcuts = JSON.parse(shortcutsData);
+            const shortcut = {
+                id: shortcuts.length,
+                title: title.value,
+                icon: iconAddress.value,
+                iconAlt: "Shortcut icon",
+                link: address.value,
+                color: `#${backgroundColor.value}`,
+            };
+
+            shortcuts.push(shortcut);
+
+            localStorage.setItem("moooboard:shortcuts", JSON.stringify(shortcuts));
+
+            emit("submit", shortcuts);
+            emit("close");
+
+            return;
+        }
+
+        const shortcut = {
+            id: 0,
+            title: title.value,
+            icon: iconAddress.value,
+            iconAlt: "Shortcut icon",
+            link: address.value,
+            color: `#${backgroundColor.value}`,
+        };
+
+        localStorage.setItem("moooboard:shortcuts", JSON.stringify([shortcut]));
+
+        emit("submit", [shortcut]);
+        emit("close");
+
+        return;
+    }
+
+    checkField(title.value, titleError, "shortcutTitle");
+    checkField(address.value, addressError, "shortcutAddress");
+
+    return;
+}
+
+watch(title, () => {
+    try {
+        shortcutTitleSchema.parse(title.value);
+
+        titleIsValid.value = true;
+    } catch (error) {
+        titleIsValid.value = false;
+    }
+});
+
+watch(address, () => {
+    try {
+        shortcutAddressSchema.parse(address.value);
+
+        addressIsValid.value = true;
+    } catch (error) {
+        addressIsValid.value = false;
+    }
+});
+
+watch(backgroundColor, () => {
+    backgroundColor.value = backgroundColor.value.replace(backgroundColorRegex, "");
+
+    if (backgroundColor.value.length > 6) backgroundColor.value = backgroundColor.value.substring(0, 6);
+});
 </script>
 
 <template>
-    <div class="popup-container">
-        <div class="popup">
+    <div class="popup-container" @click="$emit('close')">
+        <div class="popup" @click.stop>
             <div class="header">
                 <span class="font04 silk01">Create a shortcut</span>
 
-                <button type="button">
+                <button type="button" @click="$emit('close')">
                     <img src="/images/xmark.svg" alt="Xmark icon" />
                 </button>
             </div>
@@ -41,6 +125,7 @@ const addressError = ref("");
                                         id="shortcutTitle"
                                         v-model="title"
                                         placeholder="Lorem ipsum"
+                                        @focus="titleError = ''"
                                     />
                                     <img v-if="titleIsValid" src="/images/check.svg" alt="Check icon" />
                                     <img v-if="titleError" src="/images/xmark-red.svg" alt="Xmark icon" />
@@ -64,6 +149,7 @@ const addressError = ref("");
                                         id="shortcutAddress"
                                         v-model="address"
                                         placeholder="https://www.lorem-ipsum.com"
+                                        @focus="addressError = ''"
                                     />
                                     <img v-if="addressIsValid" src="/images/check.svg" alt="Check icon" />
                                     <img v-if="addressError" src="/images/xmark-red.svg" alt="Xmark icon" />
@@ -93,7 +179,11 @@ const addressError = ref("");
                                     <label class="font06 silk02" for="shortcutBgColor">Background color</label>
 
                                     <div class="color-input-container">
-                                        <div class="color-preview"></div>
+                                        <div
+                                            class="color-preview"
+                                            :style="`background-color: #${backgroundColor};`"
+                                        ></div>
+
                                         <div class="input">
                                             <span class="font02 micro02">#</span>
                                             <input
@@ -103,6 +193,7 @@ const addressError = ref("");
                                                 id="shortcutBgColor"
                                                 v-model="backgroundColor"
                                                 placeholder="151419"
+                                                @blur="backgroundColor = checkShortcutColor(backgroundColor)"
                                             />
                                         </div>
                                     </div>
@@ -111,8 +202,8 @@ const addressError = ref("");
                                 <div class="preview-container">
                                     <span class="font06 silk02">Preview</span>
 
-                                    <div class="preview">
-                                        <img src="/images/open-link.svg" alt="Open link icon" />
+                                    <div class="preview" :style="`background-color: #${backgroundColor};`">
+                                        <img :src="iconAddress" alt="Open link icon" />
                                     </div>
                                 </div>
                             </div>
@@ -120,18 +211,25 @@ const addressError = ref("");
                             <div class="icon-container">
                                 <div class="header">
                                     <span class="title font06 silk02">Icon</span>
-                                    <span class="font02 micro02">Where do you want to choose your icon from ?</span>
+                                    <span class="font02 micro02"
+                                        >Where do you want to choose your icon from&nbsp;?</span
+                                    >
                                 </div>
 
                                 <div class="content">
                                     <div class="btn-group">
-                                        <button class="btn" type="button">
+                                        <button class="btn active" type="button">
                                             <img src="/images/folder.svg" alt="Folder icon" />
                                             <span class="font02 micro02">Library</span>
                                         </button>
 
-                                        <button class="btn" type="button">
-                                            <img src="/images/globe.svg" alt="Globe icon" />
+                                        <button
+                                            :class="`btn favicon ${addressIsValid ? 'active' : ''}`"
+                                            type="button"
+                                            @click="addressIsValid ? (iconAddress = getFaviconAddress(address)) : ''"
+                                        >
+                                            <img v-if="addressIsValid" src="/images/globe.svg" alt="Globe icon" />
+                                            <img v-else src="/images/globe-grayed.svg" alt="Globe icon" />
                                             <span class="font02 micro02">Favicon</span>
                                         </button>
                                     </div>
@@ -156,7 +254,7 @@ const addressError = ref("");
                     </div>
                 </form>
 
-                <button class="btn" type="submit">
+                <button class="btn" type="submit" @click="submit()">
                     <img src="/images/plus-small-green.svg" alt="Plus icon" />
                     <span class="font02 micro02">Create</span>
                 </button>
