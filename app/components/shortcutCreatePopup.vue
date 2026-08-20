@@ -35,8 +35,10 @@ function submit() {
 
         if (shortcutsData) {
             const shortcuts = JSON.parse(shortcutsData);
+            const id = Math.max(...shortcuts.map((e: Shortcut) => e.id));
+
             const shortcut = {
-                id: shortcuts.length,
+                id: id + 1,
                 title: title.value,
                 icon: iconAddress.value,
                 iconAlt: iconAlt.value,

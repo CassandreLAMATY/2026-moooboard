@@ -26,6 +26,8 @@ function undoAction() {
     if (action) {
         if (action.type === "SCTS") {
             shortcuts.value = action.undoValue;
+
+            localStorage.setItem("moooboard:shortcuts", JSON.stringify(shortcuts.value));
         }
 
         redoActions.value.push(action);
@@ -38,6 +40,8 @@ function redoAction() {
     if (action) {
         if (action.type === "SCTS") {
             shortcuts.value = action.currentValue;
+
+            localStorage.setItem("moooboard:shortcuts", JSON.stringify(shortcuts.value));
         }
 
         undoActions.value.push(action);
@@ -46,6 +50,14 @@ function redoAction() {
 
 // ---
 // Shortcuts
+
+function handleCreateShortcut(scts: Shortcut[]) {
+    const old = shortcuts.value;
+
+    shortcuts.value = scts;
+
+    handleNewAction("SCTS", old, scts);
+}
 
 function handleDeleteShortcut(scts: Shortcut[], id: number) {
     shortcuts.value = deleteShortcut(scts, id);
@@ -85,7 +97,7 @@ onMounted(() => {
         <ShortcutCreatePopup
             v-if="shortcutCreateIsOpen"
             @close="shortcutCreateIsOpen = false"
-            @submit="(e) => (shortcuts = e)"
+            @submit="(e) => handleCreateShortcut(e)"
         />
     </div>
 </template>

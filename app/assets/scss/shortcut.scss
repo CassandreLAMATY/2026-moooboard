@@ -38,6 +38,11 @@
             height: s.$size06;
 
             border-radius: s.$size-02;
+
+            & > img {
+                min-width: s.$size02;
+                max-width: s.$size04;
+            }
         }
     }
 
