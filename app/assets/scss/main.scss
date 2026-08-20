@@ -48,6 +48,10 @@ body {
     font-size: s.$size;
 }
 
+.font08 {
+    font-family: "OpenSans Medium";
+}
+
 .theme01 {
     .micro01 {
         font-size: s.$size04 !important;
@@ -105,5 +109,9 @@ body {
 
     .font07 {
         font-family: "Montserrat Regular";
+    }
+
+    .font08 {
+        font-family: "Montserrat Medium";
     }
 }

@@ -15,6 +15,14 @@
 }
 
 @font-face {
+    font-family: "OpenSans Medium";
+    src: url("/fonts/OpenSans-Medium.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
     font-family: "OpenSans Regular";
     src: url("/fonts/OpenSans-Regular.ttf") format("truetype");
     font-weight: normal;
@@ -41,6 +49,14 @@
 @font-face {
     font-family: "Fredoka Regular";
     src: url("/fonts/Fredoka-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Montserrat Medium";
+    src: url("/fonts/Montserrat-Medium.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;

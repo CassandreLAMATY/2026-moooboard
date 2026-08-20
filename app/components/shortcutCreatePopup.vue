@@ -8,11 +8,15 @@ const emit = defineEmits<{
 }>();
 
 const isAdvancedActive = ref(true);
+const isLibraryActive = ref(false);
 
 const title = ref("");
 const address = ref("");
 const backgroundColor = ref("151419");
-const iconAddress = ref("/images/open-link.svg");
+const iconAddressDefault = ref("/images/shortcut/open-link-white-08.svg");
+const iconAddress = ref("/images/shortcut/open-link-white-08.svg");
+const iconAltDefault = ref("Shortcut icon");
+const iconAlt = ref("Open link icon");
 
 const titleIsValid = ref(false);
 const addressIsValid = ref(false);
@@ -21,6 +25,9 @@ const titleError = ref("");
 const addressError = ref("");
 
 const backgroundColorRegex = /[^a-fA-F0-9]/g;
+
+const librarySelectedColor = ref(4);
+const librarySelectedIcon = ref(0);
 
 function submit() {
     if (titleIsValid.value && addressIsValid.value) {
@@ -32,7 +39,7 @@ function submit() {
                 id: shortcuts.length,
                 title: title.value,
                 icon: iconAddress.value,
-                iconAlt: "Shortcut icon",
+                iconAlt: iconAlt.value,
                 link: address.value,
                 color: `#${backgroundColor.value}`,
             };
@@ -51,7 +58,7 @@ function submit() {
             id: 0,
             title: title.value,
             icon: iconAddress.value,
-            iconAlt: "Shortcut icon",
+            iconAlt: iconAlt.value,
             link: address.value,
             color: `#${backgroundColor.value}`,
         };
@@ -68,6 +75,24 @@ function submit() {
     checkField(address.value, addressError, "shortcutAddress");
 
     return;
+}
+
+function setFavicon() {
+    iconAddress.value = getFaviconAddress(address.value);
+    iconAlt.value = iconAltDefault.value;
+}
+
+function resetIcon() {
+    iconAddress.value = iconAddressDefault.value;
+    iconAlt.value = iconAltDefault.value;
+}
+
+function handleLibrarySubmit(e: { icon: string; iconAlt: string; selectedColor: number; selectedIcon: number }) {
+    librarySelectedColor.value = e.selectedColor;
+    librarySelectedIcon.value = e.selectedIcon;
+
+    iconAddress.value = `/images/shortcut/${e.icon}`;
+    iconAlt.value = e.iconAlt;
 }
 
 watch(title, () => {
@@ -203,22 +228,32 @@ watch(backgroundColor, () => {
                                     <span class="font06 silk02">Preview</span>
 
                                     <div class="preview" :style="`background-color: #${backgroundColor};`">
-                                        <img :src="iconAddress" alt="Open link icon" />
+                                        <img :src="iconAddress" :alt="iconAlt" />
                                     </div>
                                 </div>
                             </div>
 
                             <div class="icon-container">
                                 <div class="header">
-                                    <span class="title font06 silk02">Icon</span>
-                                    <span class="font02 micro02"
-                                        >Where do you want to choose your icon from&nbsp;?</span
-                                    >
+                                    <div class="title">
+                                        <span class="font06 silk02">Icon</span>
+                                        <button
+                                            class="btn"
+                                            type="button"
+                                            v-if="iconAddress !== iconAddressDefault"
+                                            @click="resetIcon()"
+                                        >
+                                            <span class="font08">Reset</span>
+                                        </button>
+                                    </div>
+                                    <span class="font02 micro02">
+                                        Where do you want to choose your icon from&nbsp;?
+                                    </span>
                                 </div>
 
                                 <div class="content">
                                     <div class="btn-group">
-                                        <button class="btn active" type="button">
+                                        <button class="btn active" type="button" @click="isLibraryActive = true">
                                             <img src="/images/folder.svg" alt="Folder icon" />
                                             <span class="font02 micro02">Library</span>
                                         </button>
@@ -226,7 +261,7 @@ watch(backgroundColor, () => {
                                         <button
                                             :class="`btn favicon ${addressIsValid ? 'active' : ''}`"
                                             type="button"
-                                            @click="addressIsValid ? (iconAddress = getFaviconAddress(address)) : ''"
+                                            @click="addressIsValid ? setFavicon() : ''"
                                         >
                                             <img v-if="addressIsValid" src="/images/globe.svg" alt="Globe icon" />
                                             <img v-else src="/images/globe-grayed.svg" alt="Globe icon" />
@@ -243,9 +278,9 @@ watch(backgroundColor, () => {
                                                 <input type="file" name="shortcutIcon" id="shortcutIcon" />
                                             </label>
 
-                                            <span class="font05"
-                                                >You have to be connected in order to upload an icon</span
-                                            >
+                                            <span class="font05">
+                                                You have to be connected in order to upload an icon
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -260,6 +295,14 @@ watch(backgroundColor, () => {
                 </button>
             </div>
         </div>
+
+        <ShortcutIconLibrary
+            v-if="isLibraryActive"
+            :selected-color="librarySelectedColor"
+            :selected-icon="librarySelectedIcon"
+            @close="isLibraryActive = false"
+            @submit="(e) => handleLibrarySubmit(e)"
+        />
     </div>
 </template>
 

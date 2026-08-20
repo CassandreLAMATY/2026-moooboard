@@ -45,6 +45,16 @@
                 all: unset;
 
                 cursor: pointer;
+
+                &:hover {
+                    & > img {
+                        transform: rotate(10deg) scale(1.1);
+                    }
+                }
+
+                & > img {
+                    transition: 0.2s;
+                }
             }
         }
 
@@ -160,6 +170,16 @@
 
                         & > .active {
                             transform: rotate(180deg);
+
+                            transition: 0.2s;
+                        }
+
+                        &:hover {
+                            & > .btn-content img {
+                                transform: rotate(180deg);
+
+                                transition: 1s;
+                            }
                         }
                     }
 
@@ -269,7 +289,27 @@
                                 gap: s.$size-02;
 
                                 & > .title {
-                                    color: c.$white-02;
+                                    display: flex;
+                                    align-items: baseline;
+                                    gap: s.$size-02;
+
+                                    & > span {
+                                        color: c.$white-02;
+                                    }
+
+                                    & > .btn {
+                                        background-color: unset;
+                                        border: unset;
+                                        padding: unset;
+
+                                        cursor: pointer;
+
+                                        & > span {
+                                            color: c.$light-red;
+                                            font-size: s.$size-01;
+                                            text-transform: uppercase;
+                                        }
+                                    }
                                 }
                             }
 

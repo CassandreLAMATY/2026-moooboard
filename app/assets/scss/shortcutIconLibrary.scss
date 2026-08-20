@@ -1,0 +1,129 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.lib-popup {
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    flex-direction: column;
+    gap: s.$size02;
+
+    width: 100%;
+    max-width: 384px;
+
+    padding: s.$size01 s.$size02 s.$size02 s.$size02;
+
+    background-color: c.$black-04;
+
+    border: 1px solid c.$black-05;
+    border-radius: s.$size;
+
+    filter: drop-shadow(0 0 s.$size #08070d3d);
+
+    & > .header {
+        display: flex;
+        justify-content: space-between;
+
+        & > .left {
+            display: flex;
+            align-items: center;
+            gap: s.$size-01;
+
+            & > img {
+                cursor: grab;
+                touch-action: none;
+                user-select: none;
+
+                &:active {
+                    cursor: grabbing;
+                }
+            }
+        }
+
+        & > button {
+            all: unset;
+
+            cursor: pointer;
+
+            &:hover {
+                & > img {
+                    transform: rotate(10deg) scale(1.1);
+                }
+            }
+
+            & > img {
+                transition: 0.2s;
+            }
+        }
+    }
+
+    & > .content {
+        display: flex;
+        flex-direction: column;
+        gap: s.$size;
+
+        & > .group {
+            & > .input {
+                display: flex;
+                flex-direction: column;
+                gap: s.$size-03;
+
+                & > span {
+                    color: c.$white-02;
+                }
+
+                & > .colors-container {
+                    display: flex;
+                    align-items: center;
+                    gap: s.$size-04;
+                    flex-wrap: wrap;
+
+                    & > button {
+                        width: s.$size02;
+                        height: s.$size02;
+
+                        border: 2px solid c.$black-03;
+                        border-radius: s.$size-03;
+
+                        cursor: pointer;
+
+                        &.selected {
+                            border-color: c.$light-purple;
+                        }
+                    }
+                }
+
+                & > .icons-container {
+                    display: flex;
+                    align-items: center;
+                    gap: s.$size-03;
+                    flex-wrap: wrap;
+
+                    & > button {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        width: s.$size04;
+                        height: s.$size04;
+
+                        background-color: unset;
+
+                        border: unset;
+                        border-radius: s.$size-03;
+
+                        cursor: pointer;
+
+                        &.selected {
+                            border: 1px solid c.$light-purple;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
