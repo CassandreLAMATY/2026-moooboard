@@ -270,21 +270,6 @@ watch(backgroundColor, () => {
                                             <span class="font02 micro02">Favicon</span>
                                         </button>
                                     </div>
-
-                                    <div class="file-input" id="drop-zone">
-                                        <img src="/images/import-grayed.svg" alt="Import icon" />
-
-                                        <div class="content">
-                                            <label class="font02 micro02" id="drop-zone">
-                                                Upload a file
-                                                <input type="file" name="shortcutIcon" id="shortcutIcon" />
-                                            </label>
-
-                                            <span class="font05">
-                                                You have to be connected in order to upload an icon
-                                            </span>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
