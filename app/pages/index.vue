@@ -49,6 +49,17 @@ function redoAction() {
 }
 
 // ---
+// Sign In
+
+const isLoginOpen = ref(false);
+const isRegisterOpen = ref(false);
+
+function openLogin() {
+    isLoginOpen.value = true;
+    isRegisterOpen.value = false;
+}
+
+// ---
 // Shortcuts
 
 function handleCreateShortcut(scts: Shortcut[]) {
@@ -65,7 +76,7 @@ function handleDeleteShortcut(scts: Shortcut[], id: number) {
     handleNewAction("SCTS", scts, shortcuts.value);
 }
 
-onMounted(() => {
+onMounted(async () => {
     const shortcutsData = localStorage.getItem("moooboard:shortcuts");
 
     if (shortcutsData) {
@@ -93,6 +104,12 @@ onMounted(() => {
             <span class="font02 micro02">Shortcut</span>
             <img src="/images/plus-small.svg" alt="Plus icon" />
         </button>
+
+        <!-- Account -->
+
+        <AccountCreatePopup @open-login="openLogin()" />
+
+        <!-- Shortcuts -->
 
         <ShortcutCreatePopup
             v-if="shortcutCreateIsOpen"

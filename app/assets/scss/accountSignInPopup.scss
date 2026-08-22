@@ -1,0 +1,249 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: s.$size;
+
+    background-color: #08070da3;
+
+    @include m.media-min--width(1920px) {
+        padding: s.$size s.$size06 s.$size04 s.$size06;
+    }
+
+    & .popup {
+        display: flex;
+        flex-direction: column;
+        gap: s.$size02;
+
+        width: min(100%, s.$size10);
+
+        padding: s.$size01 s.$size02 s.$size02 s.$size02;
+
+        background-color: c.$black-03;
+
+        border: 1px solid c.$black-04;
+        border-radius: s.$size;
+
+        filter: drop-shadow(0 0 s.$size #08070d3d);
+
+        & > .header-container {
+            display: flex;
+            flex-direction: column;
+            gap: s.$size-02;
+
+            & > .header {
+                display: flex;
+                justify-content: space-between;
+
+                & > button {
+                    all: unset;
+
+                    cursor: pointer;
+
+                    &:hover {
+                        & > img {
+                            transform: rotate(10deg) scale(1.1);
+                        }
+                    }
+
+                    & > img {
+                        transition: 0.2s;
+                    }
+                }
+            }
+
+            & > span {
+                color: c.$white-02;
+
+                & > .login {
+                    color: c.$light-blue;
+                    text-decoration: underline;
+
+                    cursor: pointer;
+                }
+            }
+        }
+
+        & > form {
+            display: flex;
+            flex-direction: column;
+            gap: s.$size04;
+
+            & > .group {
+                display: flex;
+                flex-direction: column;
+                gap: s.$size-02;
+
+                & .password-container {
+                    & > ul {
+                        margin: 0 0 s.$size 0;
+                        padding: unset;
+
+                        list-style: none;
+
+                        & > li {
+                            display: flex;
+                            align-items: center;
+                            gap: s.$size-02;
+
+                            & > span {
+                                color: c.$white-02;
+
+                                &.err {
+                                    color: c.$light-red;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                & .container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: s.$size-04;
+
+                    & > .input-container {
+                        display: flex;
+                        flex-direction: column;
+                        gap: s.$size-03;
+
+                        & > .input-header {
+                            display: flex;
+                            align-items: center;
+                            gap: s.$size-01;
+
+                            & > button {
+                                padding: 0;
+
+                                background-color: unset;
+                                border: unset;
+                            }
+                        }
+
+                        & label {
+                            color: c.$white-02;
+
+                            & > span {
+                                color: c.$light-purple;
+
+                                &.err {
+                                    color: c.$light-red;
+                                }
+                            }
+                        }
+
+                        & > .input {
+                            box-sizing: border-box;
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+
+                            padding: s.$size-02;
+
+                            background-color: c.$black-02;
+
+                            border: 1px solid c.$black-03;
+                            border-radius: s.$size-03;
+
+                            &:has(input:focus) {
+                                border: 1px solid c.$black-04;
+                            }
+
+                            & > input {
+                                width: 100%;
+
+                                background-color: unset;
+
+                                border: unset;
+
+                                color: c.$white;
+
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+
+                                &::placeholder {
+                                    color: c.$black-10;
+                                }
+
+                                &:focus {
+                                    outline: unset;
+                                    border: unset;
+                                }
+                            }
+                        }
+                    }
+
+                    & > span {
+                        min-height: s.$size;
+
+                        font-size: s.$size-01;
+                        color: c.$light-red;
+                        line-height: s.$size;
+                    }
+                }
+            }
+
+            & > .footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                & > .cancel {
+                    padding: unset;
+
+                    background-color: unset;
+                    border: unset;
+
+                    cursor: pointer;
+
+                    & > span {
+                        color: c.$white-02;
+                        text-decoration: underline;
+                    }
+                }
+
+                & > .submit {
+                    align-self: flex-end;
+
+                    display: flex;
+                    align-items: center;
+                    gap: s.$size-01;
+
+                    width: fit-content;
+
+                    padding: s.$size-02 s.$size01;
+
+                    background-color: c.$black-04;
+
+                    border: 2px solid c.$light-green;
+                    border-radius: 100px;
+
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: c.$black-05;
+                    }
+
+                    &:active {
+                        background-color: c.$black-04;
+                    }
+
+                    & > span {
+                        color: c.$white;
+                    }
+                }
+            }
+        }
+    }
+}
