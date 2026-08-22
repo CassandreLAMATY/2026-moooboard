@@ -168,7 +168,7 @@ function updateColorSubmit(i: number) {
             </div>
 
             <button type="button" @click="$emit('close')">
-                <img src="/images/xmark.svg" alt="Xmark icon" />
+                <img src="/images/xmark-white-09.svg" alt="Xmark icon" />
             </button>
         </div>
 

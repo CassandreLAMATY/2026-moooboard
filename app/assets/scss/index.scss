@@ -46,4 +46,21 @@
             background-color: c.$black-04;
         }
     }
+
+    .notification-container {
+        position: fixed;
+        bottom: s.$size;
+        right: s.$size;
+        z-index: 100;
+
+        width: min(512px, calc(100% - s.$size04));
+
+        pointer-events: none;
+
+        @include m.media-min--width(960px) {
+            right: s.$size02;
+
+            width: calc(100% - s.$size05);
+        }
+    }
 }

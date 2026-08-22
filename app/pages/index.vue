@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Notification } from "~/types/notification";
 import type { Shortcut } from "~/types/shortcut";
 
 const shortcutCreateIsOpen = ref(false);
@@ -60,6 +61,61 @@ function openLogin() {
 }
 
 // ---
+// Notifications
+
+const notifications: {
+    key: number;
+    title: string;
+    type: "info" | "success" | "error";
+    message: string;
+    isRemove: boolean;
+}[] = reactive([]);
+const timeouts: { key: number; timeout: NodeJS.Timeout }[] = reactive([]);
+
+function removeNotification(key: number, timeout: number): NodeJS.Timeout {
+    return setTimeout(() => {
+        notifications.splice(
+            notifications.findIndex((e) => e.key === key),
+            1,
+        );
+    }, timeout);
+}
+
+function addNotification(payload: Notification) {
+    notifications.push({
+        key: notifications.length,
+        title: payload.title,
+        type: payload.type,
+        message: payload.message,
+        isRemove: true,
+    });
+
+    timeouts.push({ key: notifications.length - 1, timeout: removeNotification(notifications.length - 1, 5200) });
+}
+
+function stopTimeout(key: number) {
+    const timeout = timeouts[timeouts.findIndex((e) => e.key === key)];
+
+    clearTimeout(timeout?.timeout);
+
+    timeouts.splice(
+        timeouts.findIndex((e) => e.key === key),
+        1,
+    );
+}
+
+function restartTimeout(key: number) {
+    removeNotification(key, 5200);
+}
+
+function deleteNotification(key: number) {
+    notifications.splice(
+        notifications.findIndex((e) => e.key === key),
+        1,
+    );
+}
+
+// ---
 // Shortcuts
 
 function handleCreateShortcut(scts: Shortcut[]) {
@@ -107,7 +163,11 @@ onMounted(async () => {
 
         <!-- Account -->
 
-        <AccountCreatePopup @open-login="openLogin()" />
+        <AccountCreatePopup
+            @open-login="openLogin()"
+            @close="isRegisterOpen = false"
+            @notify="(e: Notification) => addNotification(e)"
+        />
 
         <!-- Shortcuts -->
 
@@ -116,6 +176,22 @@ onMounted(async () => {
             @close="shortcutCreateIsOpen = false"
             @submit="(e) => handleCreateShortcut(e)"
         />
+
+        <!-- Notifications -->
+
+        <div class="notification-container">
+            <Notification
+                v-for="n in notifications"
+                :key="n.key"
+                :title="n.title"
+                :type="n.type"
+                :message="n.message"
+                :is-remove="n.isRemove"
+                @mouseenter="stopTimeout(n.key)"
+                @mouseleave="restartTimeout(n.key)"
+                @close="(e: number) => deleteNotification(e)"
+            />
+        </div>
     </div>
 </template>
 

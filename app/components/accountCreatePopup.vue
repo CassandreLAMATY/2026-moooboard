@@ -67,18 +67,17 @@ async function submit() {
             if (error instanceof FetchError) {
                 const err: {
                     ok: boolean;
-                    error: {
-                        message: string;
-                        code: string;
-                    };
+                    message: string;
                 } = error.data;
 
                 emit("notify", {
                     title: "An error occured",
                     type: "error",
-                    message: err.error.message,
+                    message: err.message,
                 });
                 emit("close");
+
+                return;
             }
 
             emit("notify", {
