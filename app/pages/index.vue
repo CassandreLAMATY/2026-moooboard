@@ -52,70 +52,96 @@ function redoAction() {
 // ---
 // Sign In
 
+const email = ref("");
+
 const isLoginOpen = ref(false);
 const isRegisterOpen = ref(false);
+const isRegisterCodeOpen = ref(false);
 
 function openLogin() {
     isLoginOpen.value = true;
     isRegisterOpen.value = false;
+    isRegisterCodeOpen.value = false;
 }
 
 function openRegister() {
     isLoginOpen.value = false;
     isRegisterOpen.value = true;
+    isRegisterCodeOpen.value = false;
+}
+
+function openRegisterCode(e: string) {
+    isLoginOpen.value = false;
+    isRegisterOpen.value = false;
+    isRegisterCodeOpen.value = true;
+
+    email.value = e;
 }
 
 // ---
 // Notifications
 
 const notifications: {
-    key: number;
+    notificationKey: number;
     title: string;
     type: "info" | "success" | "error";
     message: string;
     isRemove: boolean;
 }[] = reactive([]);
-const timeouts: { key: number; timeout: NodeJS.Timeout }[] = reactive([]);
+const timeouts: { notificationKey: number; timeout: NodeJS.Timeout }[] = reactive([]);
 
-function removeNotification(key: number, timeout: number): NodeJS.Timeout {
+function removeNotification(notificationKey: number, timeout: number): NodeJS.Timeout {
     return setTimeout(() => {
         notifications.splice(
-            notifications.findIndex((e) => e.key === key),
+            notifications.findIndex((e) => e.notificationKey === notificationKey),
+            1,
+        );
+
+        timeouts.splice(
+            timeouts.findIndex((e) => e.notificationKey === notificationKey),
             1,
         );
     }, timeout);
 }
 
 function addNotification(payload: Notification) {
+    const key = Math.max(notifications.length, Math.max(...notifications.map((e) => e.notificationKey)) + 1);
+
     notifications.push({
-        key: notifications.length,
+        notificationKey: key,
         title: payload.title,
         type: payload.type,
         message: payload.message,
         isRemove: true,
     });
 
-    timeouts.push({ key: notifications.length - 1, timeout: removeNotification(notifications.length - 1, 5200) });
+    timeouts.push({
+        notificationKey: key,
+        timeout: removeNotification(key, 5200),
+    });
 }
 
-function stopTimeout(key: number) {
-    const timeout = timeouts[timeouts.findIndex((e) => e.key === key)];
+function stopTimeout(notificationKey: number) {
+    const timeout = timeouts[timeouts.findIndex((e) => e.notificationKey === notificationKey)];
 
     clearTimeout(timeout?.timeout);
 
     timeouts.splice(
-        timeouts.findIndex((e) => e.key === key),
+        timeouts.findIndex((e) => e.notificationKey === notificationKey),
         1,
     );
 }
 
-function restartTimeout(key: number) {
-    removeNotification(key, 5200);
+function restartTimeout(notificationKey: number) {
+    timeouts.push({
+        notificationKey: notificationKey,
+        timeout: removeNotification(notificationKey, 5200),
+    });
 }
 
-function deleteNotification(key: number) {
+function deleteNotification(notificationKey: number) {
     notifications.splice(
-        notifications.findIndex((e) => e.key === key),
+        notifications.findIndex((e) => e.notificationKey === notificationKey),
         1,
     );
 }
@@ -169,16 +195,27 @@ onMounted(async () => {
 
         <!-- Account -->
 
-        <AccountLogInPopup v-if="isLoginOpen" @close="isLoginOpen = false" @open-register="openRegister()" />
+        <AccountLogInPopup
+            v-if="isLoginOpen"
+            @close="isLoginOpen = false"
+            @open-register="openRegister()"
+            @notify="(e) => addNotification(e)"
+        />
 
         <AccountCreatePopup
             v-if="isRegisterOpen"
             @open-login="openLogin()"
             @close="isRegisterOpen = false"
-            @notify="(e: Notification) => addNotification(e)"
+            @notify="(e) => addNotification(e)"
+            @submit="(e) => openRegisterCode(e)"
         />
 
-        <AccountCreateCodePopup email="cassandre.lamaty@gmail.com" />
+        <AccountCreateCodePopup
+            v-if="isRegisterCodeOpen"
+            :email="email"
+            @close="isRegisterCodeOpen = false"
+            @notify="(e) => addNotification(e)"
+        />
 
         <!-- Shortcuts -->
 
@@ -193,14 +230,15 @@ onMounted(async () => {
         <div class="notification-container">
             <Notification
                 v-for="n in notifications"
-                :key="n.key"
+                :key="n.notificationKey"
+                :notificationKey="n.notificationKey"
                 :title="n.title"
                 :type="n.type"
                 :message="n.message"
                 :is-remove="n.isRemove"
-                @mouseenter="stopTimeout(n.key)"
-                @mouseleave="restartTimeout(n.key)"
-                @close="(e: number) => deleteNotification(e)"
+                @mouseenter="stopTimeout(n.notificationKey)"
+                @mouseleave="restartTimeout(n.notificationKey)"
+                @close="(e) => deleteNotification(e)"
             />
         </div>
     </div>

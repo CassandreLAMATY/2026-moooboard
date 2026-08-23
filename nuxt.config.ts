@@ -16,6 +16,7 @@ export default defineNuxtConfig({
         appName: process.env.APP_NAME,
         appEmail: process.env.APP_EMAIL,
         backendBaseUrl: process.env.BACKEND_BASE_URL,
+        nodeEnv: process.env.NODE_ENV,
         public: {
             site: {
                 url: "https://moooboard.kodurooo.com",

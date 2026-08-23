@@ -255,6 +255,10 @@
                                 outline: unset;
                                 border: 1px solid c.$black-04;
                             }
+
+                            &.err {
+                                border: 1px solid c.$light-red;
+                            }
                         }
                     }
                 }

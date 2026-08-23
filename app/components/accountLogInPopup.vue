@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import type { Notification } from "~/types/notification";
+
+const emit = defineEmits<{
+    (event: "notify", payload: Notification): void;
+    (event: "close"): void;
+    (event: "openRegister"): void;
+}>();
+
 const email = ref("");
 const password = ref("");
 
@@ -14,8 +22,6 @@ const isPasswordDisplayed = ref(false);
 
 const hasBeenFocus = ref(false);
 const hasBeenBlur = ref(false);
-
-const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[_#?!@$%^&*-])[a-zA-Z0-9_#?!@$%^&*-]+$/;
 
 function focusPassword() {
     hasBeenFocus.value = true;

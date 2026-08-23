@@ -1,10 +1,14 @@
 <script setup lang="ts">
 defineProps<{
-    key: number;
+    notificationKey: number;
     title: string;
     type: "info" | "success" | "error";
     message: string;
     isRemove: boolean;
+}>();
+
+const emit = defineEmits<{
+    (event: "close", payload: number): void;
 }>();
 </script>
 
@@ -13,7 +17,7 @@ defineProps<{
         <div class="header">
             <span class="font04 silk01">{{ title }}</span>
 
-            <button type="button" @click="$emit('close', key)">
+            <button type="button" @click="$emit('close', notificationKey)">
                 <img src="/images/xmark-white-09.svg" alt="Xmark icon" />
             </button>
         </div>

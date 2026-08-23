@@ -5,7 +5,7 @@ import type { Notification } from "~/types/notification";
 
 const emit = defineEmits<{
     (event: "notify", payload: Notification): void;
-    (event: "submit"): void;
+    (event: "submit", payload: string): void;
     (event: "openLogin"): void;
     (event: "close"): void;
 }>();
@@ -68,8 +68,10 @@ async function submit() {
                 },
             });
 
-            emit("submit");
+            emit("submit", email.value);
         } catch (error) {
+            submitIsLoading.value = false;
+
             if (error instanceof FetchError) {
                 const err: {
                     ok: boolean;
@@ -81,7 +83,6 @@ async function submit() {
                     type: "error",
                     message: err.message,
                 });
-                emit("close");
 
                 return;
             }

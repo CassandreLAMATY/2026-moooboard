@@ -83,8 +83,8 @@
 
     &.remove {
         animation-delay: 5s;
-
         animation-name: removeSmall;
+        animation-fill-mode: forwards;
 
         @include m.media-min--width(1920px) {
             animation-name: removeBig;

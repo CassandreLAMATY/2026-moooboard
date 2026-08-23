@@ -53,14 +53,12 @@
         right: s.$size;
         z-index: 100;
 
-        width: min(512px, calc(100% - s.$size04));
+        display: flex;
+        flex-direction: column;
+        gap: s.$size-02;
+
+        width: min(calc(100% - s.$size04), 512px);
 
         pointer-events: none;
-
-        @include m.media-min--width(960px) {
-            right: s.$size02;
-
-            width: calc(100% - s.$size05);
-        }
     }
 }

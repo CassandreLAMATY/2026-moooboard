@@ -4,29 +4,29 @@ const config = useRuntimeConfig();
 
 const schema = z.object({
     username: z
-        .string({ error: 'This field must be of type "string"' })
-        .min(1, { error: "This field must contain at least 1 character" })
-        .max(16, { error: "This field must contain at most 16 characters" })
+        .string({ error: 'Field username must be of type "string"' })
+        .min(1, { error: "Field username must contain at least 1 character" })
+        .max(16, { error: "Field username must contain at most 16 characters" })
         .regex(/^(?=.*[A-Za-z])[A-Za-z0-9 _-]+$/, {
-            error: "This field can only contain letters, numbers, spaces and -_, and must contain at lease 1 letter",
+            error: "Field username can only contain letters, numbers, spaces and -_, and must contain at lease 1 letter",
         }),
 
     email: z
-        .email({ error: "This field must contain a valid email address" })
-        .max(256, { error: "This field must contain at most 256 characters" }),
+        .email({ error: "Field email must contain a valid email address" })
+        .max(256, { error: "Field email must contain at most 256 characters" }),
 
     password: z
         .string({
-            error: 'This field must be of type "string"',
+            error: 'Field password must be of type "string"',
         })
         .min(8, {
-            error: "This field must contain at least 8 characters",
+            error: "Field password must contain at least 8 characters",
         })
         .max(32, {
-            error: "This field must contain at most 32 characters",
+            error: "Field password must contain at most 32 characters",
         })
         .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[_#?!@$%^&*-])[a-zA-Z0-9_#?!@$%^&*-]+$/, {
-            error: "This field can only contain letters, numbers, and _#?!@$%^&*-",
+            error: "Field password can only contain letters, numbers, and _#?!@$%^&*-",
         }),
 });
 
@@ -67,6 +67,14 @@ export default defineEventHandler(async (event) => {
         } = await $fetch(`${config.backendBaseUrl}/account/register`, {
             method: "POST",
             body: reqBody,
+        });
+
+        setCookie(event, "uuid", data.data.uuid, {
+            httpOnly: true,
+            secure: config.nodeEnv === "production",
+            path: "/",
+            sameSite: "strict",
+            maxAge: 60 * 60 * 24,
         });
 
         event.node.res.statusCode = 200;
