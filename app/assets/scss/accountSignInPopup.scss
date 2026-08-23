@@ -73,6 +73,10 @@
 
                     cursor: pointer;
                 }
+
+                & > .underline {
+                    text-decoration: underline;
+                }
             }
         }
 
@@ -197,6 +201,87 @@
                 }
             }
 
+            & > .code-group {
+                display: flex;
+                flex-direction: column;
+                gap: s.$size04;
+
+                & .code-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: s.$size;
+
+                    & > label {
+                        & > span {
+                            color: c.$white-02;
+                        }
+                    }
+
+                    & > .input-container {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: s.$size-03;
+
+                        & > input {
+                            text-align: center;
+
+                            width: s.$size04;
+                            height: s.$size05;
+
+                            background-color: c.$black-02;
+
+                            border: unset;
+                            border-radius: s.$size-03;
+
+                            color: c.$white;
+
+                            &::-webkit-outer-spin-button {
+                                -webkit-appearance: none;
+                                margin: 0;
+                            }
+
+                            &::-webkit-inner-spin-button {
+                                -webkit-appearance: none;
+                                margin: 0;
+                            }
+
+                            &[type="number"] {
+                                appearance: textfield;
+                                -moz-appearance: textfield;
+                            }
+
+                            &:focus {
+                                outline: unset;
+                                border: 1px solid c.$black-04;
+                            }
+                        }
+                    }
+                }
+
+                & > .btn-container {
+                    & > button {
+                        background-color: unset;
+                        border: unset;
+
+                        color: c.$black-10;
+                        text-decoration: underline;
+
+                        cursor: not-allowed;
+
+                        &.active {
+                            color: c.$light-purple;
+
+                            cursor: pointer;
+                        }
+                    }
+
+                    & > .timer {
+                        color: c.$white-02;
+                    }
+                }
+            }
+
             & > .footer {
                 display: flex;
                 align-items: center;
@@ -245,8 +330,144 @@
                     & > span {
                         color: c.$white;
                     }
+
+                    &.loading {
+                        border-color: c.$white-09;
+
+                        cursor: not-allowed;
+
+                        &:hover {
+                            background-color: c.$black-04;
+                        }
+
+                        &:active {
+                            background-color: c.$black-04;
+                        }
+
+                        & > span {
+                            color: c.$white-09;
+                        }
+
+                        & > svg {
+                            & > .dot01 {
+                                animation-name: dot01;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+
+                            & > .dot02 {
+                                animation-name: dot02;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+
+                            & > .dot03 {
+                                animation-name: dot03;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+                        }
+                    }
+                }
+
+                & > .submit-code {
+                    align-self: flex-end;
+
+                    display: flex;
+                    align-items: center;
+                    gap: s.$size-01;
+
+                    width: fit-content;
+
+                    padding: s.$size-02 s.$size01;
+
+                    background-color: c.$black-04;
+
+                    border: 2px solid c.$black-10;
+                    border-radius: 100px;
+
+                    cursor: not-allowed;
+
+                    & > span {
+                        color: c.$black-10;
+                    }
+
+                    &.active {
+                        border-color: c.$light-green;
+
+                        cursor: pointer;
+
+                        &:hover {
+                            background-color: c.$black-05;
+                        }
+
+                        &:active {
+                            background-color: c.$black-04;
+                        }
+
+                        & > span {
+                            color: c.$white;
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+@keyframes dot01 {
+    0% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
+    }
+}
+
+@keyframes dot02 {
+    0% {
+        opacity: 0%;
+    }
+    24% {
+        opacity: 0%;
+    }
+    25% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
+    }
+}
+
+@keyframes dot03 {
+    0% {
+        opacity: 0%;
+    }
+    49% {
+        opacity: 0%;
+    }
+    50% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
     }
 }

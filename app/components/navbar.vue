@@ -40,7 +40,7 @@ const props = defineProps<{
                 <img src="/images/gear.svg" alt="MoooBoard Logo" />
             </button>
 
-            <button class="btn" type="button">
+            <button class="btn" type="button" @click="$emit('openLogin')">
                 <img src="/images/door-open-arrow-in.svg" alt="MoooBoard Logo" />
                 <span class="font02 micro02"> Sign in </span>
             </button>

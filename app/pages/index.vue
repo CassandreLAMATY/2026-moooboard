@@ -60,6 +60,11 @@ function openLogin() {
     isRegisterOpen.value = false;
 }
 
+function openRegister() {
+    isLoginOpen.value = false;
+    isRegisterOpen.value = true;
+}
+
 // ---
 // Notifications
 
@@ -148,6 +153,7 @@ onMounted(async () => {
             :redo-length="redoActions.length"
             @undo="undoAction()"
             @redo="redoAction"
+            @open-login="isLoginOpen = true"
         />
 
         <ShortcutBox
@@ -163,11 +169,16 @@ onMounted(async () => {
 
         <!-- Account -->
 
+        <AccountLogInPopup v-if="isLoginOpen" @close="isLoginOpen = false" @open-register="openRegister()" />
+
         <AccountCreatePopup
+            v-if="isRegisterOpen"
             @open-login="openLogin()"
             @close="isRegisterOpen = false"
             @notify="(e: Notification) => addNotification(e)"
         />
+
+        <AccountCreateCodePopup email="cassandre.lamaty@gmail.com" />
 
         <!-- Shortcuts -->
 

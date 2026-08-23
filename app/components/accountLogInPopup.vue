@@ -102,11 +102,11 @@ function focusPassword() {
                 </div>
 
                 <div class="footer">
-                    <button type="button">
+                    <button class="cancel" type="button">
                         <span class="font02 micro02">Cancel</span>
                     </button>
 
-                    <button type="button">
+                    <button class="submit" type="button">
                         <img src="/images/door-open-arrow-in-green.svg" alt="Door open icon" />
                         <span class="font02 micro02">Log in</span>
                     </button>
@@ -115,3 +115,7 @@ function focusPassword() {
         </div>
     </div>
 </template>
+
+<style scoped lang="scss">
+@use "~/assets/scss/accountSignInPopup.scss";
+</style>

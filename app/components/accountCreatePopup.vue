@@ -40,7 +40,11 @@ function focusPassword() {
 //---
 // Submit
 
+const submitIsLoading = ref(false);
+
 async function submit() {
+    if (submitIsLoading.value) return;
+
     if (usernameIsValid.value && emailIsValid.value && passwordIsValid.value) {
         if (password.value !== passwordConfirm.value) {
             passwordConfirmError.value = "Password confirmation is different from password";
@@ -53,6 +57,8 @@ async function submit() {
         }
 
         try {
+            submitIsLoading.value = true;
+
             await $fetch("/api/registerHandler", {
                 method: "POST",
                 body: {
@@ -381,8 +387,20 @@ watch(password, () => {
                         <span class="font02 micro02">Cancel</span>
                     </button>
 
-                    <button class="submit" type="submit">
-                        <img src="/images/door-open-arrow-in-green.svg" alt="Door open icon" />
+                    <button :class="['submit', submitIsLoading ? 'loading' : '']" type="submit">
+                        <svg
+                            v-if="submitIsLoading"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path class="dot01" d="M6 10H2V14H6V10Z" fill="#8F8C8F" />
+                            <path class="dot02" d="M14 10H10V14H14V10Z" fill="#8F8C8F" />
+                            <path class="dot03" d="M22 10H18V14H22V10Z" fill="#8F8C8F" />
+                        </svg>
+                        <img v-else src="/images/door-open-arrow-in-green.svg" alt="Door open icon" />
                         <span class="font02 micro02">Register</span>
                     </button>
                 </div>
