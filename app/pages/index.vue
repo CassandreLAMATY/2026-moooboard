@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import getUsername from "~/composables/getUsername";
 import type { Notification } from "~/types/notification";
 import type { Shortcut } from "~/types/shortcut";
 
@@ -11,48 +12,19 @@ const shortcuts: Ref<Shortcut[]> = ref([]);
 
 // Undo & Redo actions
 
-function handleNewAction(type: string, undoValue: any, currentValue: any) {
-    undoActions.value.push({
-        type: type,
-        undoValue: undoValue,
-        currentValue: currentValue,
-    });
-
-    redoActions.value = [];
+function handleUndo() {
+    undoAction(undoActions, redoActions, shortcuts);
 }
 
-function undoAction() {
-    const action = undoActions.value.pop();
-
-    if (action) {
-        if (action.type === "SCTS") {
-            shortcuts.value = action.undoValue;
-
-            localStorage.setItem("moooboard:shortcuts", JSON.stringify(shortcuts.value));
-        }
-
-        redoActions.value.push(action);
-    }
-}
-
-function redoAction() {
-    const action = redoActions.value.pop();
-
-    if (action) {
-        if (action.type === "SCTS") {
-            shortcuts.value = action.currentValue;
-
-            localStorage.setItem("moooboard:shortcuts", JSON.stringify(shortcuts.value));
-        }
-
-        undoActions.value.push(action);
-    }
+function handleRedo() {
+    redoAction(redoActions, undoActions, shortcuts);
 }
 
 // ---
 // Sign In
 
 const email = ref("");
+const username = ref("");
 
 const isLoginOpen = ref(false);
 const isRegisterOpen = ref(false);
@@ -78,6 +50,10 @@ function openRegisterCode(e: string) {
     email.value = e;
 }
 
+function handleGetUsername() {
+    getUsername(username, notifications, timeouts);
+}
+
 // ---
 // Notifications
 
@@ -89,37 +65,6 @@ const notifications: {
     isRemove: boolean;
 }[] = reactive([]);
 const timeouts: { notificationKey: number; timeout: NodeJS.Timeout }[] = reactive([]);
-
-function removeNotification(notificationKey: number, timeout: number): NodeJS.Timeout {
-    return setTimeout(() => {
-        notifications.splice(
-            notifications.findIndex((e) => e.notificationKey === notificationKey),
-            1,
-        );
-
-        timeouts.splice(
-            timeouts.findIndex((e) => e.notificationKey === notificationKey),
-            1,
-        );
-    }, timeout);
-}
-
-function addNotification(payload: Notification) {
-    const key = Math.max(notifications.length, Math.max(...notifications.map((e) => e.notificationKey)) + 1);
-
-    notifications.push({
-        notificationKey: key,
-        title: payload.title,
-        type: payload.type,
-        message: payload.message,
-        isRemove: true,
-    });
-
-    timeouts.push({
-        notificationKey: key,
-        timeout: removeNotification(key, 5200),
-    });
-}
 
 function stopTimeout(notificationKey: number) {
     const timeout = timeouts[timeouts.findIndex((e) => e.notificationKey === notificationKey)];
@@ -135,7 +80,7 @@ function stopTimeout(notificationKey: number) {
 function restartTimeout(notificationKey: number) {
     timeouts.push({
         notificationKey: notificationKey,
-        timeout: removeNotification(notificationKey, 5200),
+        timeout: removeNotification(notifications, timeouts, notificationKey, 5200),
     });
 }
 
@@ -154,16 +99,20 @@ function handleCreateShortcut(scts: Shortcut[]) {
 
     shortcuts.value = scts;
 
-    handleNewAction("SCTS", old, scts);
+    handleNewAction(undoActions, redoActions, "SCTS", old, scts);
 }
 
 function handleDeleteShortcut(scts: Shortcut[], id: number) {
     shortcuts.value = deleteShortcut(scts, id);
 
-    handleNewAction("SCTS", scts, shortcuts.value);
+    handleNewAction(undoActions, redoActions, "SCTS", scts, shortcuts.value);
 }
 
 onMounted(async () => {
+    if (await checkIsUserConnected()) {
+        handleGetUsername();
+    }
+
     const shortcutsData = localStorage.getItem("moooboard:shortcuts");
 
     if (shortcutsData) {
@@ -177,8 +126,9 @@ onMounted(async () => {
         <Navbar
             :undo-length="undoActions.length"
             :redo-length="redoActions.length"
-            @undo="undoAction()"
-            @redo="redoAction"
+            :username="username"
+            @undo="handleUndo"
+            @redo="handleRedo"
             @open-login="isLoginOpen = true"
         />
 
@@ -199,14 +149,14 @@ onMounted(async () => {
             v-if="isLoginOpen"
             @close="isLoginOpen = false"
             @open-register="openRegister()"
-            @notify="(e) => addNotification(e)"
+            @notify="(e) => addNotification(notifications, timeouts, e)"
         />
 
         <AccountCreatePopup
             v-if="isRegisterOpen"
             @open-login="openLogin()"
             @close="isRegisterOpen = false"
-            @notify="(e) => addNotification(e)"
+            @notify="(e) => addNotification(notifications, timeouts, e)"
             @submit="(e) => openRegisterCode(e)"
         />
 
@@ -214,7 +164,8 @@ onMounted(async () => {
             v-if="isRegisterCodeOpen"
             :email="email"
             @close="isRegisterCodeOpen = false"
-            @notify="(e) => addNotification(e)"
+            @notify="(e) => addNotification(notifications, timeouts, e)"
+            @submit="handleGetUsername()"
         />
 
         <!-- Shortcuts -->

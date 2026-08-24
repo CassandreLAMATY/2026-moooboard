@@ -93,6 +93,8 @@ nav {
             align-items: center;
             gap: s.$size-01;
 
+            max-width: s.$size08;
+
             padding: s.$size-02;
 
             background-color: c.$black-02;
@@ -114,6 +116,10 @@ nav {
 
             & > span {
                 display: none;
+
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
 
                 @include m.media-min--width(630px) {
                     display: block;

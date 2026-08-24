@@ -2,6 +2,7 @@
 const props = defineProps<{
     undoLength: number;
     redoLength: number;
+    username: string | undefined;
 }>();
 </script>
 
@@ -41,8 +42,9 @@ const props = defineProps<{
             </button>
 
             <button class="btn" type="button" @click="$emit('openLogin')">
-                <img src="/images/door-open-arrow-in.svg" alt="MoooBoard Logo" />
-                <span class="font02 micro02"> Sign in </span>
+                <img v-if="!username" src="/images/door-open-arrow-in.svg" alt="Door open icon" />
+                <img v-else src="/images/user-white-02.svg" alt="User icon" />
+                <span class="font02 micro02"> {{ username ? username : "Sign in" }} </span>
             </button>
         </div>
     </nav>

@@ -8,6 +8,7 @@ defineProps<{
 
 const emit = defineEmits<{
     (event: "notify", payload: Notification): void;
+    (event: "submit"): void;
     (event: "close"): void;
 }>();
 
@@ -60,6 +61,8 @@ function handlePaste(event: ClipboardEvent) {
     });
 
     inputs.value[Math.min(pastedCode.length, 6) - 1]?.focus();
+
+    checkIsSubmitAllowed();
 }
 
 //---
@@ -165,6 +168,7 @@ async function submit() {
             },
         });
 
+        emit("submit");
         emit("close");
     } catch (error) {
         if (error instanceof FetchError) {

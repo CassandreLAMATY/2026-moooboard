@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
         event.node.res.statusCode = 400;
         return {
             ok: false,
-            error: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid register form",
+            error: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid registration form",
         };
     }
 
@@ -85,13 +85,24 @@ export default defineEventHandler(async (event) => {
         };
     } catch (error) {
         if (error instanceof FetchError) {
-            const err: {
-                ok: boolean;
-                error: {
-                    message: string;
-                    code: string;
+            const err:
+                | {
+                      ok: boolean;
+                      error: {
+                          message: string;
+                          code: string;
+                      };
+                  }
+                | undefined = error.data;
+
+            if (!err) {
+                event.node.res.statusCode = 500;
+
+                return {
+                    ok: false,
+                    message: "An error occured, please try again later",
                 };
-            } = error.data;
+            }
 
             event.node.res.statusCode = error.statusCode || 500;
 

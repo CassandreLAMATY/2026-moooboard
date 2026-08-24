@@ -117,13 +117,25 @@ export default defineEventHandler(async (event) => {
         };
     } catch (error) {
         if (error instanceof FetchError) {
-            const err: {
-                ok: boolean;
-                error: {
-                    message: string;
-                    code: string;
+            const err:
+                | {
+                      ok: boolean;
+                      error: {
+                          message: string;
+                          code: string;
+                      };
+                  }
+                | undefined = error.data;
+
+            if (!err) {
+                event.node.res.statusCode = 500;
+
+                return {
+                    ok: false,
+                    disconnected: false,
+                    message: "An error occured, please try again later",
                 };
-            } = error.data;
+            }
 
             event.node.res.statusCode = error.statusCode || 500;
 
@@ -138,7 +150,7 @@ export default defineEventHandler(async (event) => {
 
         return {
             ok: false,
-            message: "An error occured, please try again later.",
+            message: "An error occured, please try again later",
         };
     }
 });
