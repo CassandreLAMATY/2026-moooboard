@@ -1,6 +1,7 @@
 import { FetchError } from "ofetch";
 
 export default async function getUsername(
+    isLoggedIn: Ref<boolean>,
     username: Ref<string>,
     notifications: {
         notificationKey: number;
@@ -20,6 +21,7 @@ export default async function getUsername(
             method: "GET",
         });
 
+        isLoggedIn.value = true;
         username.value = data.data.username;
     } catch (error) {
         if (error instanceof FetchError) {

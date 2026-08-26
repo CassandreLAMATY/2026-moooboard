@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import getUsername from "~/composables/getUsername";
-import type { Notification } from "~/types/notification";
 import type { Shortcut } from "~/types/shortcut";
 
 const shortcutCreateIsOpen = ref(false);
@@ -25,6 +24,7 @@ function handleRedo() {
 
 const email = ref("");
 const username = ref("");
+const isLoggedIn = ref(false);
 
 const isLoginOpen = ref(false);
 const isRegisterOpen = ref(false);
@@ -50,8 +50,17 @@ function openRegisterCode(e: string) {
     email.value = e;
 }
 
+function handleResetData() {
+    resetData(isLoggedIn, username, email);
+}
+
 function handleGetUsername() {
-    getUsername(username, notifications, timeouts);
+    getUsername(isLoggedIn, username, notifications, timeouts);
+}
+
+function handleRegister() {
+    getUsername(isLoggedIn, username, notifications, timeouts);
+    email.value = "";
 }
 
 // ---
@@ -130,6 +139,8 @@ onMounted(async () => {
             @undo="handleUndo"
             @redo="handleRedo"
             @open-login="isLoginOpen = true"
+            @log-out="handleResetData()"
+            @notify="(e) => addNotification(notifications, timeouts, e)"
         />
 
         <ShortcutBox
@@ -165,7 +176,7 @@ onMounted(async () => {
             :email="email"
             @close="isRegisterCodeOpen = false"
             @notify="(e) => addNotification(notifications, timeouts, e)"
-            @submit="handleGetUsername()"
+            @submit="handleRegister()"
         />
 
         <!-- Shortcuts -->

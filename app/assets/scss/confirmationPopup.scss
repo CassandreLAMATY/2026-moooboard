@@ -1,0 +1,222 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: s.$size;
+
+    background-color: #08070da3;
+
+    @include m.media-min--width(1920px) {
+        padding: s.$size s.$size06 s.$size04 s.$size06;
+    }
+
+    & > .popup {
+        display: flex;
+        flex-direction: column;
+        gap: s.$size02;
+
+        width: min(100%, s.$size10);
+
+        padding: s.$size01 s.$size02 s.$size02 s.$size02;
+
+        background-color: c.$black-03;
+
+        border: 1px solid c.$black-04;
+        border-radius: s.$size;
+
+        filter: drop-shadow(0 0 s.$size #08070d3d);
+
+        & > .header-container {
+            display: flex;
+            flex-direction: column;
+            gap: s.$size-02;
+
+            & > .header {
+                display: flex;
+                justify-content: space-between;
+
+                & > button {
+                    all: unset;
+
+                    cursor: pointer;
+
+                    &:hover {
+                        & > img {
+                            transform: rotate(10deg) scale(1.1);
+                        }
+                    }
+
+                    & > img {
+                        transition: 0.2s;
+                    }
+                }
+            }
+
+            & > span {
+                color: c.$white-02;
+
+                & > .red {
+                    color: c.$light-red;
+                }
+            }
+        }
+
+        & > .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            & > .cancel {
+                padding: unset;
+
+                background-color: unset;
+                border: unset;
+
+                cursor: pointer;
+
+                & > span {
+                    color: c.$white-02;
+                    text-decoration: underline;
+                }
+            }
+
+            & > .submit {
+                align-self: flex-end;
+
+                display: flex;
+                align-items: center;
+                gap: s.$size-01;
+
+                width: fit-content;
+
+                padding: s.$size-02 s.$size01;
+
+                background-color: c.$black-04;
+
+                border: 2px solid c.$light-red;
+                border-radius: 100px;
+
+                cursor: pointer;
+
+                &:hover {
+                    background-color: c.$black-05;
+                }
+
+                &:active {
+                    background-color: c.$black-04;
+                }
+
+                & > span {
+                    color: c.$white;
+                }
+
+                &.loading {
+                    border-color: c.$white-09;
+
+                    cursor: not-allowed;
+
+                    &:hover {
+                        background-color: c.$black-04;
+                    }
+
+                    &:active {
+                        background-color: c.$black-04;
+                    }
+
+                    & > span {
+                        color: c.$white-09;
+                    }
+
+                    & > svg {
+                        & > .dot01 {
+                            animation-name: dot01;
+                            animation-duration: 3s;
+                            animation-iteration-count: infinite;
+                        }
+
+                        & > .dot02 {
+                            animation-name: dot02;
+                            animation-duration: 3s;
+                            animation-iteration-count: infinite;
+                        }
+
+                        & > .dot03 {
+                            animation-name: dot03;
+                            animation-duration: 3s;
+                            animation-iteration-count: infinite;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@keyframes dot01 {
+    0% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
+    }
+}
+
+@keyframes dot02 {
+    0% {
+        opacity: 0%;
+    }
+    24% {
+        opacity: 0%;
+    }
+    25% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
+    }
+}
+
+@keyframes dot03 {
+    0% {
+        opacity: 0%;
+    }
+    49% {
+        opacity: 0%;
+    }
+    50% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
+    }
+}

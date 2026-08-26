@@ -90,7 +90,7 @@ async function submit() {
             emit("notify", {
                 title: "An error occured",
                 type: "error",
-                message: "An error occured while attempting to submit your registration. Please, try again later.",
+                message: "An error occured while attempting to submit your registration. Please, try again later",
             });
             emit("close");
         }

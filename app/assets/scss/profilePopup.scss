@@ -1,0 +1,90 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 5;
+
+    padding: s.$size;
+
+    background-color: #08070d3d;
+
+    @include m.media-min--width(1920px) {
+        padding: s.$size s.$size06 s.$size04 s.$size06;
+    }
+
+    & > .popup {
+        position: absolute;
+        transform: translateX(-100%);
+
+        display: flex;
+        flex-direction: column;
+        gap: s.$size;
+
+        width: s.$size09;
+
+        padding: s.$size01 s.$size02 s.$size02 s.$size02;
+
+        background-color: c.$black-03;
+
+        border: 1px solid c.$black-04;
+        border-radius: s.$size;
+
+        filter: drop-shadow(0 0 s.$size #08070d3d);
+
+        & > .content {
+            display: flex;
+            flex-direction: column;
+            gap: s.$size-03;
+
+            & > button {
+                display: flex;
+                align-items: center;
+                gap: s.$size-01;
+
+                padding: s.$size-02 s.$size-01;
+
+                background-color: unset;
+
+                border: unset;
+                border-radius: s.$size-03;
+
+                cursor: pointer;
+
+                & > span {
+                    color: c.$white;
+                }
+
+                &:hover {
+                    background-color: c.$black-04;
+                }
+            }
+        }
+
+        & > .separator {
+            width: 100%;
+            height: 1px;
+
+            background-color: c.$black-10;
+        }
+
+        & > .footer {
+            display: flex;
+            align-items: center;
+            gap: s.$size-03;
+
+            & > span {
+                color: c.$white-02;
+
+                & > a {
+                    color: c.$light-blue;
+                }
+            }
+        }
+    }
+}

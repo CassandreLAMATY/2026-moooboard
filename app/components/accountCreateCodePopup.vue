@@ -210,7 +210,7 @@ onMounted(() => {
         <div class="popup" @click.stop>
             <div class="header-container">
                 <div class="header">
-                    <span class="font04 silk01">Confirm Email address</span>
+                    <span class="font04 silk01">Confirm email address</span>
 
                     <button type="button" @click="$emit('close')">
                         <img src="/images/xmark.svg" alt="Xmark icon" />
