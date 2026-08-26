@@ -17,7 +17,7 @@ const schema = z.object({
 });
 
 const uuidSchema = z.uuid({
-    error: `You must provide a valid UUID`,
+    error: `You must provide a valid authentication UUID`,
 });
 
 export default defineEventHandler(async (event) => {
@@ -41,13 +41,13 @@ export default defineEventHandler(async (event) => {
 
     // UUID
 
-    const uuid = getCookie(event, "uuid");
+    const uuid = getCookie(event, "authentication_uuid");
 
     if (!uuid) {
         event.node.res.statusCode = 500;
         return {
             ok: false,
-            message: "Please, register first or click the link in the email you received to proceed",
+            message: "Please log in first or use the link in the email you received to proceed",
         };
     }
 
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
     if (!parseUuid.success) {
         event.node.res.statusCode = 400;
 
-        deleteCookie(event, "uuid");
+        deleteCookie(event, "authentication_uuid");
 
         return {
             ok: false,
@@ -89,12 +89,12 @@ export default defineEventHandler(async (event) => {
                 refresh_token: string;
                 access_token: string;
             };
-        } = await $fetch(`${config.backendBaseUrl}/account/register/verification`, {
+        } = await $fetch(`${config.backendBaseUrl}/auth/login`, {
             method: "POST",
             body: reqBody,
         });
 
-        deleteCookie(event, "uuid");
+        deleteCookie(event, "authentication_uuid");
 
         setCookie(event, "access_token", data.data.access_token, {
             httpOnly: true,

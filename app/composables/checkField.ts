@@ -1,11 +1,16 @@
 import { ZodError } from "zod";
 import { shortcutAddressSchema, shortcutTitleSchema } from "~/schemas/shortcutSchemas";
-import { signInEmailSchema, signInPasswordSchema, signInUsernameSchema } from "~/schemas/signInSchemas";
+import {
+    signInEmailSchema,
+    signInLoginPasswordSchema,
+    signInPasswordSchema,
+    signInUsernameSchema,
+} from "~/schemas/signInSchemas";
 
 export default function checkField(
     field: string,
     fieldError: Ref<string>,
-    type: "shortcutTitle" | "shortcutAddress" | "username" | "email" | "password",
+    type: "shortcutTitle" | "shortcutAddress" | "username" | "email" | "password" | "loginPassword",
 ): boolean {
     try {
         if (type === "username") {
@@ -18,6 +23,10 @@ export default function checkField(
 
         if (type === "password") {
             signInPasswordSchema.parse(field);
+        }
+
+        if (type === "loginPassword") {
+            signInLoginPasswordSchema.parse(field);
         }
 
         // Shortcut

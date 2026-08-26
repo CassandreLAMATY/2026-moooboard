@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import getUsername from "~/composables/getUsername";
+import type { Notification } from "~/types/notification";
 import type { Shortcut } from "~/types/shortcut";
 
 const shortcutCreateIsOpen = ref(false);
@@ -25,29 +26,31 @@ function handleRedo() {
 const email = ref("");
 const username = ref("");
 const isLoggedIn = ref(false);
+const codeType: Ref<"registration" | "login"> = ref("registration");
 
 const isLoginOpen = ref(false);
 const isRegisterOpen = ref(false);
-const isRegisterCodeOpen = ref(false);
+const isCodeOpen = ref(false);
 
 function openLogin() {
     isLoginOpen.value = true;
     isRegisterOpen.value = false;
-    isRegisterCodeOpen.value = false;
+    isCodeOpen.value = false;
 }
 
 function openRegister() {
     isLoginOpen.value = false;
     isRegisterOpen.value = true;
-    isRegisterCodeOpen.value = false;
+    isCodeOpen.value = false;
 }
 
-function openRegisterCode(e: string) {
+function openCode(data: { email: string; type: "registration" | "login" }) {
+    email.value = data.email;
+    codeType.value = data.type;
+
     isLoginOpen.value = false;
     isRegisterOpen.value = false;
-    isRegisterCodeOpen.value = true;
-
-    email.value = e;
+    isCodeOpen.value = true;
 }
 
 function handleResetData() {
@@ -161,6 +164,7 @@ onMounted(async () => {
             @close="isLoginOpen = false"
             @open-register="openRegister()"
             @notify="(e) => addNotification(notifications, timeouts, e)"
+            @submit="(e) => openCode(e)"
         />
 
         <AccountCreatePopup
@@ -168,14 +172,15 @@ onMounted(async () => {
             @open-login="openLogin()"
             @close="isRegisterOpen = false"
             @notify="(e) => addNotification(notifications, timeouts, e)"
-            @submit="(e) => openRegisterCode(e)"
+            @submit="(e) => openCode(e)"
         />
 
-        <AccountCreateCodePopup
-            v-if="isRegisterCodeOpen"
+        <AccountCodePopup
+            v-if="isCodeOpen"
             :email="email"
-            @close="isRegisterCodeOpen = false"
-            @notify="(e) => addNotification(notifications, timeouts, e)"
+            :type="codeType"
+            @close="isCodeOpen = false"
+            @notify="(e: Notification) => addNotification(notifications, timeouts, e)"
             @submit="handleRegister()"
         />
 

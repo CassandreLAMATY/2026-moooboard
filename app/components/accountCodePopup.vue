@@ -2,7 +2,8 @@
 import { FetchError } from "ofetch";
 import type { Notification } from "~/types/notification";
 
-defineProps<{
+const props = defineProps<{
+    type: "registration" | "login";
     email: string;
 }>();
 
@@ -161,12 +162,23 @@ async function submit() {
     if (submitIsLoading.value || !code) return;
 
     try {
-        await $fetch("/api/registerVerificationHandler", {
-            method: "POST",
-            body: {
-                code: code,
-            },
-        });
+        if (props.type === "registration") {
+            await $fetch("/api/registerVerificationHandler", {
+                method: "POST",
+                body: {
+                    code: code,
+                },
+            });
+        }
+
+        if (props.type === "login") {
+            await $fetch("/api/loginVerificationHandler", {
+                method: "POST",
+                body: {
+                    code: code,
+                },
+            });
+        }
 
         emit("submit");
         emit("close");
@@ -178,8 +190,16 @@ async function submit() {
                 code: string | undefined;
             } = error.data;
 
-            if (err.code && err.code === "E07020") {
+            if ((err.code && err.code === "E07020") || (err.code && err.code === "E08020")) {
                 isCodeError.value = true;
+
+                emit("notify", {
+                    title: "Invalid code",
+                    type: "error",
+                    message: err.message,
+                });
+
+                return;
             }
 
             emit("notify", {
@@ -194,7 +214,7 @@ async function submit() {
         emit("notify", {
             title: "An error occured",
             type: "error",
-            message: "An error occured while attempting to verify your account. Please, try again later.",
+            message: "An error occured while attempting to verify your account. Please, try again later",
         });
         emit("close");
     }
@@ -210,7 +230,9 @@ onMounted(() => {
         <div class="popup" @click.stop>
             <div class="header-container">
                 <div class="header">
-                    <span class="font04 silk01">Confirm email address</span>
+                    <span class="font04 silk01">
+                        {{ type === "registration" ? "Confirm email address" : "Login confirmation" }}
+                    </span>
 
                     <button type="button" @click="$emit('close')">
                         <img src="/images/xmark.svg" alt="Xmark icon" />
@@ -280,7 +302,7 @@ onMounted(() => {
                             alt="Door open icon"
                         />
                         <img v-else src="/images/door-open-arrow-in-grayed.svg" alt="Door open icon" />
-                        <span class="font02 micro02">Register</span>
+                        <span class="font02 micro02">{{ type === "registration" ? "Register" : "Log in" }}</span>
                     </button>
                 </div>
             </form>

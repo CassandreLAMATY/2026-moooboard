@@ -1,17 +1,20 @@
 <script setup lang="ts">
+import { FetchError } from "ofetch";
+import { signInEmailSchema, signInLoginPasswordSchema } from "~/schemas/signInSchemas";
 import type { Notification } from "~/types/notification";
 
 const emit = defineEmits<{
     (event: "notify", payload: Notification): void;
-    (event: "close"): void;
+    (event: "submit", payload: { email: string; type: "login" }): void;
     (event: "openRegister"): void;
+    (event: "close"): void;
 }>();
 
 const email = ref("");
 const password = ref("");
 
-const emailIsValid = ref("");
-const passwordIsValid = ref("");
+const emailIsValid = ref(false);
+const passwordIsValid = ref(false);
 
 const emailError = ref("");
 const passwordError = ref("");
@@ -27,6 +30,82 @@ function focusPassword() {
     hasBeenFocus.value = true;
     passwordError.value = "";
 }
+
+//---
+// Submit
+
+const submitIsLoading = ref(false);
+
+async function submit() {
+    if (submitIsLoading.value) return;
+
+    if (emailIsValid.value && passwordIsValid.value) {
+        try {
+            submitIsLoading.value = true;
+
+            await $fetch("/api/loginSendCodeHandler", {
+                method: "POST",
+                body: {
+                    email: email.value,
+                    password: password.value,
+                },
+            });
+
+            emit("submit", { email: email.value, type: "login" });
+        } catch (error) {
+            submitIsLoading.value = false;
+
+            if (error instanceof FetchError) {
+                const err: {
+                    ok: boolean;
+                    message: string;
+                } = error.data;
+
+                emit("notify", {
+                    title: "An error occured",
+                    type: "error",
+                    message: err.message,
+                });
+
+                return;
+            }
+
+            emit("notify", {
+                title: "An error occured",
+                type: "error",
+                message: "An error occured while attempting to log you in. Please, try again later",
+            });
+            emit("close");
+        }
+
+        return;
+    }
+
+    checkField(email.value, emailError, "email");
+    checkField(password.value, passwordError, "loginPassword");
+
+    return;
+}
+
+watch(email, () => {
+    try {
+        signInEmailSchema.parse(email.value);
+
+        emailIsValid.value = true;
+    } catch (error) {
+        emailIsValid.value = false;
+    }
+});
+
+watch(password, () => {
+    try {
+        signInLoginPasswordSchema.parse(password.value);
+
+        passwordIsValid.value = true;
+    } catch (error) {
+        passwordIsValid.value = false;
+    }
+});
 </script>
 
 <template>
@@ -47,7 +126,7 @@ function focusPassword() {
                 </span>
             </div>
 
-            <form>
+            <form @submit.prevent="submit()">
                 <div class="group">
                     <div class="container">
                         <div class="input-container">
@@ -112,8 +191,20 @@ function focusPassword() {
                         <span class="font02 micro02">Cancel</span>
                     </button>
 
-                    <button class="submit" type="button">
-                        <img src="/images/door-open-arrow-in-green.svg" alt="Door open icon" />
+                    <button class="submit" type="submit">
+                        <svg
+                            v-if="submitIsLoading"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path class="dot01" d="M6 10H2V14H6V10Z" fill="#8F8C8F" />
+                            <path class="dot02" d="M14 10H10V14H14V10Z" fill="#8F8C8F" />
+                            <path class="dot03" d="M22 10H18V14H22V10Z" fill="#8F8C8F" />
+                        </svg>
+                        <img v-else src="/images/door-open-arrow-in-green.svg" alt="Door open icon" />
                         <span class="font02 micro02">Log in</span>
                     </button>
                 </div>

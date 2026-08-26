@@ -1,23 +1,25 @@
 import { FetchError } from "ofetch";
-import { UAParser } from "ua-parser-js";
 import z from "zod";
 const config = useRuntimeConfig();
 
 const schema = z.object({
-    code: z
-        .string({
-            error: `Field code must be of type "string"`,
-        })
-        .length(6, {
-            error: `Field code must contain 6 digits`,
-        })
-        .regex(/^[0-9]{6}$/, {
-            error: `Field code must contain 6 digits`,
-        }),
-});
+    email: z
+        .email({ error: "Field email must contain a valid email address" })
+        .max(256, { error: "Field email must contain at most 256 characters" }),
 
-const uuidSchema = z.uuid({
-    error: `You must provide a valid UUID`,
+    password: z
+        .string({
+            error: 'Field password must be of type "string"',
+        })
+        .min(8, {
+            error: "Field password must contain at least 8 characters",
+        })
+        .max(32, {
+            error: "Field password must contain at most 32 characters",
+        })
+        .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[_#?!@$%^&*-])[a-zA-Z0-9_#?!@$%^&*-]+$/, {
+            error: "Field password can only contain letters, numbers, and _#?!@$%^&*-",
+        }),
 });
 
 export default defineEventHandler(async (event) => {
@@ -26,8 +28,6 @@ export default defineEventHandler(async (event) => {
         return { ok: false, error: "Method not authorized" };
     }
 
-    // Body (code)
-
     const body = await readBody(event);
     const parseBody = schema.safeParse(body);
 
@@ -35,46 +35,13 @@ export default defineEventHandler(async (event) => {
         event.node.res.statusCode = 400;
         return {
             ok: false,
-            error: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid code",
+            error: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid login form",
         };
     }
-
-    // UUID
-
-    const uuid = getCookie(event, "uuid");
-
-    if (!uuid) {
-        event.node.res.statusCode = 500;
-        return {
-            ok: false,
-            message: "Please, register first or click the link in the email you received to proceed",
-        };
-    }
-
-    const parseUuid = uuidSchema.safeParse(uuid);
-
-    if (!parseUuid.success) {
-        event.node.res.statusCode = 400;
-
-        deleteCookie(event, "uuid");
-
-        return {
-            ok: false,
-            error: parseUuid.error.issues[0] ? parseUuid.error.issues[0].path[0] : "Invalid request",
-        };
-    }
-
-    // Browser & device
-
-    const userAgent = getRequestHeader(event, "user-agent");
-
-    const { browser, device } = UAParser(userAgent);
 
     const reqBody = {
-        uuid: parseUuid.data,
-        code: parseBody.data.code,
-        browser: browser.name,
-        device: device.is("mobile") ? "Mobile" : "Desktop",
+        email: parseBody.data.email,
+        password: parseBody.data.password,
         app_source: {
             name: config.appName,
             email: config.appEmail,
@@ -86,30 +53,19 @@ export default defineEventHandler(async (event) => {
             ok: boolean;
             message: string;
             data: {
-                refresh_token: string;
-                access_token: string;
+                uuid: string;
             };
-        } = await $fetch(`${config.backendBaseUrl}/account/register/verification`, {
+        } = await $fetch(`${config.backendBaseUrl}/auth/login/send-code`, {
             method: "POST",
             body: reqBody,
         });
 
-        deleteCookie(event, "uuid");
-
-        setCookie(event, "access_token", data.data.access_token, {
+        setCookie(event, "authentication_uuid", data.data.uuid, {
             httpOnly: true,
             secure: config.nodeEnv === "production",
             path: "/",
             sameSite: "strict",
-            maxAge: 60 * 15,
-        });
-
-        setCookie(event, "refresh_token", data.data.refresh_token, {
-            httpOnly: true,
-            secure: config.nodeEnv === "production",
-            path: "/",
-            sameSite: "strict",
-            maxAge: 60 * 60 * 24 * 30,
+            maxAge: 60 * 10,
         });
 
         event.node.res.statusCode = 200;
@@ -135,7 +91,6 @@ export default defineEventHandler(async (event) => {
 
                 return {
                     ok: false,
-                    disconnected: false,
                     message: "An error occured, please try again later",
                 };
             }
@@ -145,7 +100,6 @@ export default defineEventHandler(async (event) => {
             return {
                 ok: false,
                 message: err.error.message,
-                code: err.error.code,
             };
         }
 
@@ -153,7 +107,7 @@ export default defineEventHandler(async (event) => {
 
         return {
             ok: false,
-            message: "An error occured, please try again later",
+            message: "An error occured, please try again later.",
         };
     }
 });
