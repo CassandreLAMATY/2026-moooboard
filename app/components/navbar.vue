@@ -33,6 +33,11 @@ function toggleProfileBtn() {
     emit("openLogin");
 }
 
+function handleLogoutClose() {
+    isLogoutConfirmationOpen.value = false;
+    isProfileOpen.value = false;
+}
+
 onMounted(() => {
     getProfilePopupPosition(profileBtn, profileBtnX, profileBtnY);
 
@@ -98,7 +103,7 @@ onUnmounted(() => {
 
             <LogoutConfirmationPopup
                 v-if="isLogoutConfirmationOpen"
-                @close="isLogoutConfirmationOpen = false"
+                @close="handleLogoutClose()"
                 @submit="$emit('logOut')"
                 @notify="(e: Notification) => $emit('notify', e)"
             />

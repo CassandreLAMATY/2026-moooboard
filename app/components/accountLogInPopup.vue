@@ -39,7 +39,7 @@ const submitIsLoading = ref(false);
 async function submit() {
     if (submitIsLoading.value) return;
 
-    if (emailIsValid.value && passwordIsValid.value) {
+    if (emailIsValid.value && password.value.length > 0) {
         try {
             submitIsLoading.value = true;
 
@@ -81,8 +81,12 @@ async function submit() {
         return;
     }
 
+    if (password.value.length === 0) {
+        passwordIsValid.value = false;
+        passwordError.value = "This field must contain a valid password";
+    }
+
     checkField(email.value, emailError, "email");
-    checkField(password.value, passwordError, "loginPassword");
 
     return;
 }
@@ -99,8 +103,6 @@ watch(email, () => {
 
 watch(password, () => {
     try {
-        signInLoginPasswordSchema.parse(password.value);
-
         passwordIsValid.value = true;
     } catch (error) {
         passwordIsValid.value = false;
@@ -156,9 +158,7 @@ watch(password, () => {
                         <div class="container">
                             <div class="input-container">
                                 <div class="input-header">
-                                    <label class="font06 silk02" for="password">
-                                        <span :class="passwordError ? 'err' : ''">*</span> Password
-                                    </label>
+                                    <label class="font06 silk02" for="password"> <span>*</span> Password </label>
 
                                     <button type="button" @click="isPasswordDisplayed = !isPasswordDisplayed">
                                         <img v-if="!isPasswordDisplayed" src="/images/eye.svg" alt="Eye icon" />
@@ -176,7 +176,6 @@ watch(password, () => {
                                         @focus="focusPassword()"
                                         @blur="hasBeenBlur = true"
                                     />
-                                    <img v-if="passwordIsValid" src="/images/check.svg" alt="Check icon" />
                                     <img v-if="passwordError" src="/images/xmark-red.svg" alt="Xmark icon" />
                                 </div>
                             </div>
@@ -191,7 +190,7 @@ watch(password, () => {
                         <span class="font02 micro02">Cancel</span>
                     </button>
 
-                    <button class="submit" type="submit">
+                    <button :class="['submit', submitIsLoading ? 'loading' : '']" type="submit">
                         <svg
                             v-if="submitIsLoading"
                             width="24"

@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
         const data: {
             ok: boolean;
             message: string;
-        } = await $fetch(`${config.backendBaseUrl}/account/logout`, {
+        } = await $fetch(`${config.backendBaseUrl}/auth/logout`, {
             method: "POST",
             body: {
                 access_token: accessToken,

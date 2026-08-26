@@ -21,6 +21,7 @@ async function submit() {
         });
 
         emit("submit");
+        emit("close");
     } catch (error) {
         submitIsLoading.value = false;
 
@@ -30,6 +31,7 @@ async function submit() {
                 message: string;
             } = error.data;
 
+            emit("submit");
             emit("notify", {
                 title: "An error occured",
                 type: "error",
@@ -39,6 +41,7 @@ async function submit() {
             return;
         }
 
+        emit("submit");
         emit("notify", {
             title: "An error occured",
             type: "error",
