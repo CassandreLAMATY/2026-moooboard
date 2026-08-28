@@ -149,7 +149,7 @@ onMounted(async () => {
         <ShortcutBox
             v-if="shortcuts.length > 0"
             :shortcuts="shortcuts"
-            @delete="(e: Shortcut) => handleDeleteShortcut(shortcuts, e.id)"
+            @delete="(e: number) => handleDeleteShortcut(shortcuts, e)"
         />
 
         <button class="btn shortcut-add" type="button" @click="shortcutCreateIsOpen = true">

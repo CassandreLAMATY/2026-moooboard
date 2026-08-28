@@ -1,0 +1,70 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 7;
+
+    padding: s.$size;
+
+    background-color: #08070d3d;
+
+    @include m.media-min--width(1920px) {
+        padding: s.$size s.$size06 s.$size04 s.$size06;
+    }
+
+    & > .popup {
+        position: absolute;
+        transform: translateX(-100%);
+
+        width: min(100%, 384px);
+        max-height: 720px;
+
+        display: flex;
+        flex-direction: column;
+
+        padding: s.$size01 s.$size-02 s.$size02 s.$size02;
+
+        background-color: c.$black-03;
+
+        border: 1px solid c.$black-04;
+        border-radius: s.$size;
+
+        filter: drop-shadow(0 0 s.$size #08070d3d);
+
+        & > .shortcuts-container {
+            display: flex;
+            flex-direction: column;
+
+            min-height: 0;
+            flex: 1 1 auto;
+
+            overflow-y: auto;
+
+            &::-webkit-scrollbar {
+                width: s.$size-02;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: c.$black-02;
+
+                border-radius: s.$size-04;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: c.$black-04;
+
+                border-radius: s.$size-04;
+            }
+
+            &::-webkit-scrollbar-thumb:hover {
+                background: c.$black-05;
+            }
+        }
+    }
+}

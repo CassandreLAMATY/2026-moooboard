@@ -39,16 +39,16 @@ function handleLogoutClose() {
 }
 
 onMounted(() => {
-    getProfilePopupPosition(profileBtn, profileBtnX, profileBtnY);
+    getPopupPosition(profileBtn, profileBtnX, profileBtnY);
 
     window.addEventListener("resize", () => {
-        getProfilePopupPosition(profileBtn, profileBtnX, profileBtnY);
+        getPopupPosition(profileBtn, profileBtnX, profileBtnY);
     });
 });
 
 onUnmounted(() => {
     window.removeEventListener("resize", () => {
-        getProfilePopupPosition(profileBtn, profileBtnX, profileBtnY);
+        getPopupPosition(profileBtn, profileBtnX, profileBtnY);
     });
 });
 </script>

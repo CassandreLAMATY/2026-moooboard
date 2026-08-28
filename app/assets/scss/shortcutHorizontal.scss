@@ -1,0 +1,92 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.shortcut-container {
+    position: relative;
+
+    max-width: 328px;
+
+    &:hover {
+        & > .shortcut-link {
+            background-color: c.$black-04;
+
+            & .font03 {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    & .shortcut-link {
+        all: unset;
+
+        box-sizing: border-box;
+
+        display: flex;
+        align-items: center;
+        gap: s.$size-01;
+
+        width: 100%;
+
+        padding: s.$size-03 s.$size-02;
+
+        border-radius: s.$size-03;
+
+        cursor: pointer;
+
+        & .font03 {
+            max-width: 100%;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+        & .shortcut {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: s.$size04;
+            height: s.$size04;
+
+            border-radius: s.$size-03;
+
+            & > img {
+                width: s.$size02;
+            }
+        }
+    }
+
+    & .shortcut-delete {
+        all: unset;
+
+        position: absolute;
+        top: 50%;
+        right: -8px;
+
+        transform: translateY(-50%);
+
+        display: none;
+
+        cursor: pointer;
+
+        &:hover {
+            display: block;
+
+            & > img {
+                transform: rotate(10deg);
+            }
+        }
+
+        & > img {
+            transition: 0.1s;
+        }
+    }
+
+    &:has(.shortcut-link:hover) {
+        & .shortcut-delete {
+            display: block;
+        }
+    }
+}

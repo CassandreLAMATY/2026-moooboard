@@ -15,13 +15,14 @@ const props = defineProps<{
 
 <template>
     <div class="shortcut-container">
-        <a class="shortcut-link" :href="props.link">
-            <div class="shortcut" :style="`background-color: ${props.color}`">
-                <img :src="props.icon" :alt="props.iconAlt" />
+        <a :href="link" class="shortcut-link">
+            <div class="shortcut" :style="`background-color: ${color}`">
+                <img :src="icon" :alt="iconAlt" />
             </div>
 
-            <span class="font03 micro03">{{ props.title }}</span>
+            <span class="font03 micro03">{{ title }}</span>
         </a>
+
         <button type="button" class="shortcut-delete" @click="$emit('delete', props.id)">
             <img src="/images/stop-circle-full.svg" alt="Delete icon" />
         </button>
@@ -29,5 +30,5 @@ const props = defineProps<{
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/shortcut.scss";
+@use "~/assets/scss/shortcutHorizontal.scss";
 </style>
