@@ -28,7 +28,7 @@
         display: flex;
         flex-direction: column;
 
-        padding: s.$size01 s.$size-02 s.$size02 s.$size02;
+        padding: s.$size s.$size-02 s.$size s.$size;
 
         background-color: c.$black-03;
 
@@ -36,6 +36,10 @@
         border-radius: s.$size;
 
         filter: drop-shadow(0 0 s.$size #08070d3d);
+
+        @include m.media-min--width(1920px) {
+            padding: s.$size01 s.$size-02 s.$size02 s.$size02;
+        }
 
         & > .shortcuts-container {
             display: flex;

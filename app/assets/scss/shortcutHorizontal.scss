@@ -5,7 +5,11 @@
 .shortcut-container {
     position: relative;
 
-    max-width: 328px;
+    max-width: 344px;
+
+    @include m.media-min--width(1920px) {
+        max-width: 328px;
+    }
 
     &:hover {
         & > .shortcut-link {
