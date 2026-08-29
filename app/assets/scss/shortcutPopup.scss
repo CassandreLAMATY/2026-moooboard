@@ -49,6 +49,7 @@
             flex: 1 1 auto;
 
             overflow-y: auto;
+            overflow-x: hidden;
 
             &::-webkit-scrollbar {
                 width: s.$size-02;

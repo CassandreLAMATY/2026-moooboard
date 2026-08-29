@@ -1,4 +1,9 @@
 <script setup lang="ts">
+const emit = defineEmits<{
+    (event: "delete", payload: number): void;
+    (event: "close"): void;
+}>();
+
 const props = defineProps<{
     shortcuts: { id: number; link: string; title: string; icon: string; iconAlt: string; color: string }[];
     x: number;

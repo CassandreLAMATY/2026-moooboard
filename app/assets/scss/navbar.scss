@@ -12,6 +12,7 @@ nav {
     min-height: s.$size04;
 
     & .action-container {
+        z-index: 8;
         display: flex;
         gap: s.$size-02;
 

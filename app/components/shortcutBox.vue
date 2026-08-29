@@ -82,6 +82,7 @@ watch(props.shortcuts, () => {
             :x="boxX"
             :y="boxY"
             @close="isPopupOpen = false"
+            @delete="(id) => $emit('delete', id)"
         />
     </div>
 </template>
