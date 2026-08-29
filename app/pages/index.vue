@@ -152,6 +152,10 @@ onMounted(async () => {
             @delete="(e: number) => handleDeleteShortcut(shortcuts, e)"
         />
 
+        <div class="content">
+            <DateSection />
+        </div>
+
         <button class="btn shortcut-add" type="button" @click="shortcutCreateIsOpen = true">
             <span class="font02 micro02">Shortcut</span>
             <img src="/images/plus-small.svg" alt="Plus icon" />

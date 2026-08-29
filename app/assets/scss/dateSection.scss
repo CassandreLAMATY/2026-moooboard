@@ -1,0 +1,26 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.date-section {
+    display: flex;
+    flex-direction: column;
+    gap: s.$size-02;
+
+    & > .container {
+        display: flex;
+        flex-direction: column;
+
+        & > .day {
+            color: c.$white-07;
+        }
+    }
+
+    & > .week {
+        color: c.$white-07;
+    }
+
+    & > .time {
+        font-size: s.$size01;
+    }
+}
