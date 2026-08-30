@@ -1,0 +1,49 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.switch-container {
+    position: relative;
+
+    & > svg {
+        & .background {
+            fill: c.$black-02;
+
+            transition: 0.1s;
+        }
+
+        & .outline {
+            fill: c.$black-04;
+        }
+
+        & .ball {
+            fill: c.$black-10;
+
+            transition: 0.1s;
+        }
+
+        &.active {
+            & .background {
+                fill: c.$light-purple;
+            }
+
+            & .ball {
+                fill: c.$white;
+
+                transform: translateX(40%);
+            }
+        }
+    }
+
+    & > input {
+        all: unset;
+
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        cursor: pointer;
+    }
+}

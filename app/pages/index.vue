@@ -198,6 +198,10 @@ onMounted(async () => {
             @submit="(e) => handleCreateShortcut(e)"
         />
 
+        <!-- Pomodoro -->
+
+        <PomodoroPopup />
+
         <!-- Notifications -->
 
         <div class="notification-container">

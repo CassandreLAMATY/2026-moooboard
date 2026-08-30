@@ -1,0 +1,37 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.buddy-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: s.$size07;
+    height: s.$size07;
+
+    border-radius: s.$size-02;
+
+    &.active {
+        background-color: c.$black-04;
+        border: 1px solid c.$black-05;
+    }
+
+    & > img {
+        display: block;
+    }
+
+    & > input {
+        all: unset;
+
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        cursor: pointer;
+    }
+}

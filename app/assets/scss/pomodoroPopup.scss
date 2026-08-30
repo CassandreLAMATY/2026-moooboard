@@ -1,0 +1,321 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+.popup-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: s.$size;
+
+    background-color: #08070da3;
+
+    @include m.media-min--width(1920px) {
+        padding: s.$size s.$size06 s.$size04 s.$size06;
+    }
+
+    & > .popup {
+        display: flex;
+        flex-direction: column;
+        gap: s.$size02;
+
+        width: min(100%, s.$size10);
+
+        padding: s.$size01 s.$size02 s.$size02 s.$size02;
+
+        background-color: c.$black-03;
+
+        border: 1px solid c.$black-04;
+        border-radius: s.$size;
+
+        filter: drop-shadow(0 0 s.$size #08070d3d);
+
+        & > .header {
+            display: flex;
+            justify-content: space-between;
+
+            & > button {
+                all: unset;
+
+                cursor: pointer;
+
+                &:hover {
+                    & > img {
+                        transform: rotate(10deg) scale(1.1);
+                    }
+                }
+
+                & > img {
+                    transition: 0.2s;
+                }
+            }
+        }
+
+        & > form {
+            display: flex;
+            flex-direction: column;
+            gap: s.$size04;
+
+            & > .content {
+                display: flex;
+                flex-direction: column;
+                gap: s.$size;
+
+                & > .top {
+                    display: flex;
+                    flex-direction: column;
+                    gap: s.$size;
+
+                    & > .container {
+                        display: flex;
+                        flex-direction: column;
+                        gap: s.$size-03;
+
+                        & > .input-container {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        }
+
+                        & > span {
+                            font-size: s.$size-01;
+                            color: c.$white-02;
+
+                            & > .underline {
+                                text-decoration: underline;
+                            }
+                        }
+                    }
+
+                    & > .group {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: s.$size02;
+
+                        & > .input-container {
+                            display: flex;
+                            flex-direction: column;
+                            gap: s.$size-03;
+
+                            width: 100%;
+
+                            & > label {
+                                color: c.$white-02;
+
+                                & > span {
+                                    color: c.$light-purple;
+                                }
+                            }
+
+                            & > .input {
+                                display: flex;
+                                align-items: center;
+                                gap: s.$size-02;
+
+                                width: fit-content;
+
+                                padding: s.$size-02;
+
+                                background-color: c.$black-02;
+
+                                border: 1px solid c.$black-03;
+                                border-radius: s.$size-03;
+
+                                &:has(input:focus) {
+                                    border: 1px solid c.$black-04;
+                                }
+
+                                & > .btn-container {
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: s.$size-02;
+                                    & > button {
+                                        all: unset;
+
+                                        display: block;
+
+                                        cursor: pointer;
+
+                                        & > img {
+                                            display: block;
+                                        }
+                                    }
+                                }
+
+                                & > .wrapper {
+                                    display: flex;
+                                    align-items: baseline;
+                                    gap: s.$size-02;
+
+                                    & > input {
+                                        width: s.$size05;
+
+                                        background-color: unset;
+
+                                        border: unset;
+
+                                        font-size: s.$size;
+                                        text-align: end;
+                                        color: c.$white;
+
+                                        &:focus {
+                                            border: unset;
+                                            outline: unset;
+                                        }
+
+                                        &::-webkit-outer-spin-button {
+                                            -webkit-appearance: none;
+                                            margin: 0;
+                                        }
+
+                                        &::-webkit-inner-spin-button {
+                                            -webkit-appearance: none;
+                                            margin: 0;
+                                        }
+                                    }
+
+                                    & > span {
+                                        font-size: s.$size-01;
+                                        color: c.$white-02;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                & > .separator {
+                    height: 1px;
+                    width: 100%;
+
+                    background-color: c.$black-05;
+                }
+
+                & > .buddy-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: s.$size-01;
+
+                    & > label {
+                        color: c.$white-02;
+                    }
+
+                    & > .container {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        justify-content: space-between;
+                        gap: s.$size-01;
+
+                        @include m.media-max--width(501px) {
+                            &::after {
+                                content: "";
+
+                                width: s.$size07;
+                                height: s.$size07;
+                            }
+                        }
+                    }
+                }
+            }
+
+            & > .footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                & > .cancel {
+                    padding: unset;
+
+                    background-color: unset;
+                    border: unset;
+
+                    cursor: pointer;
+
+                    & > span {
+                        color: c.$white-02;
+                        text-decoration: underline;
+                    }
+                }
+
+                & > .submit {
+                    align-self: flex-end;
+
+                    display: flex;
+                    align-items: center;
+                    gap: s.$size-01;
+
+                    width: fit-content;
+
+                    padding: s.$size-02 s.$size01;
+
+                    background-color: c.$black-04;
+
+                    border: 2px solid c.$light-green;
+                    border-radius: 100px;
+
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: c.$black-05;
+                    }
+
+                    &:active {
+                        background-color: c.$black-04;
+                    }
+
+                    & > span {
+                        color: c.$white;
+                    }
+
+                    &.loading {
+                        border-color: c.$white-09;
+
+                        cursor: not-allowed;
+
+                        &:hover {
+                            background-color: c.$black-04;
+                        }
+
+                        &:active {
+                            background-color: c.$black-04;
+                        }
+
+                        & > span {
+                            color: c.$white-09;
+                        }
+
+                        & > svg {
+                            & > .dot01 {
+                                animation-name: dot01;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+
+                            & > .dot02 {
+                                animation-name: dot02;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+
+                            & > .dot03 {
+                                animation-name: dot03;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
