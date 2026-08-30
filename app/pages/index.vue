@@ -146,14 +146,16 @@ onMounted(async () => {
             @notify="(e) => addNotification(notifications, timeouts, e)"
         />
 
-        <ShortcutBox
-            v-if="shortcuts.length > 0"
-            :shortcuts="shortcuts"
-            @delete="(e: number) => handleDeleteShortcut(shortcuts, e)"
-        />
-
         <div class="content">
+            <ShortcutBox
+                v-if="shortcuts.length > 0"
+                :shortcuts="shortcuts"
+                @delete="(e: number) => handleDeleteShortcut(shortcuts, e)"
+            />
+
             <DateSection />
+
+            <PomodoroSection />
         </div>
 
         <button class="btn shortcut-add" type="button" @click="shortcutCreateIsOpen = true">

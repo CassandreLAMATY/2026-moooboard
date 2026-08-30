@@ -1,0 +1,171 @@
+@use "./default/sizes" as s;
+@use "./default/colors" as c;
+@use "./default/mixins" as m;
+
+@property --angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+.pomodoro-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: s.$size02;
+
+    padding: s.$size;
+
+    background-color: c.$black-02;
+
+    border-radius: s.$size;
+
+    @include m.media-min--width(630px) {
+        padding: s.$size02;
+    }
+
+    .btn-round {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: s.$size04;
+        height: s.$size04;
+
+        background-color: c.$black-01;
+
+        border: unset;
+        border-radius: 100px;
+
+        cursor: pointer;
+
+        & > svg {
+            fill: c.$white-02;
+        }
+
+        &:hover {
+            border: 1px solid c.$black-03;
+
+            &.settings {
+                & > img {
+                    transform: rotate(180deg);
+
+                    transition: 1s;
+                }
+            }
+
+            &.focus {
+                & > svg {
+                    fill: c.$light-purple;
+                }
+            }
+
+            &.relax {
+                & > svg {
+                    fill: c.$light-yellow;
+                }
+            }
+        }
+    }
+
+    & > .header {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+
+        width: 100%;
+    }
+
+    & > .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+
+        & > .pomodoro {
+            position: relative;
+
+            width: calc(s.$size08 + s.$size);
+            aspect-ratio: 1;
+
+            background-color: c.$black-01;
+
+            border-radius: 1000px;
+
+            & > .gradient {
+                width: 100%;
+                height: 100%;
+
+                border-radius: 1000px;
+
+                background: conic-gradient(#b7abff3d var(--angle), c.$light-purple var(--angle) 360deg);
+
+                transition: --angle 1s linear;
+
+                &.relax {
+                    background: conic-gradient(#ffd37a3d var(--angle), c.$light-yellow var(--angle) 360deg);
+                }
+
+                &.paused {
+                    animation-play-state: paused;
+                }
+            }
+
+            & > .icon-container {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translateX(-50%) translateY(-50%);
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                width: s.$size08;
+                aspect-ratio: 1;
+
+                background-color: c.$black-01;
+
+                border-radius: 1000px;
+
+                & > img {
+                    width: s.$size07;
+                }
+            }
+        }
+
+        & > .footer {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            width: 100%;
+
+            & > .status {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+
+                color: c.$white-07;
+
+                &.focus {
+                    color: c.$light-purple;
+                }
+
+                &.relax {
+                    color: c.$light-yellow;
+                }
+            }
+
+            & > .btn-container {
+                display: flex;
+                align-items: center;
+                gap: s.$size-03;
+            }
+        }
+    }
+}

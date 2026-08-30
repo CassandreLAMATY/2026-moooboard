@@ -7,6 +7,12 @@
     flex-direction: column;
     gap: s.$size-02;
 
+    padding: s.$size;
+
+    @include m.media-min--width(630px) {
+        padding: s.$size02;
+    }
+
     & > .container {
         display: flex;
         flex-direction: column;
