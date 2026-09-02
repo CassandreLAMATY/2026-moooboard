@@ -3,6 +3,7 @@ import { FetchError } from "ofetch";
 export default async function getUsername(
     isLoggedIn: Ref<boolean>,
     username: Ref<string>,
+    email: Ref<string>,
     notifications: {
         notificationKey: number;
         title: string;
@@ -27,8 +28,13 @@ export default async function getUsername(
         if (error instanceof FetchError) {
             const err: {
                 ok: boolean;
+                disconnected: boolean;
                 message: string;
             } = error.data;
+
+            if (err.disconnected) {
+                resetData(isLoggedIn, username, email);
+            }
 
             addNotification(notifications, timeouts, {
                 title: "An error occured",

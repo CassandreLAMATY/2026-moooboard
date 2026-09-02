@@ -1,6 +1,7 @@
-import { FetchError } from "ofetch";
 import { UAParser } from "ua-parser-js";
 import z from "zod";
+import { Exception } from "../core/errors/Exception";
+import handleError from "../middlewares/handleError";
 const config = useRuntimeConfig();
 
 const schema = z.object({
@@ -16,14 +17,15 @@ const schema = z.object({
         }),
 });
 
-const uuidSchema = z.uuid({
+const uuidSchema = z.uuidv4({
     error: `You must provide a valid UUID`,
 });
 
 export default defineEventHandler(async (event) => {
     if (event.node.req.method !== "POST") {
-        event.node.res.statusCode = 405;
-        return { ok: false, error: "Method not authorized" };
+        setResponseStatus(event, 405);
+
+        return { ok: false, disconnected: false, message: "Method not authorized" };
     }
 
     // Body (code)
@@ -32,10 +34,12 @@ export default defineEventHandler(async (event) => {
     const parseBody = schema.safeParse(body);
 
     if (!parseBody.success) {
-        event.node.res.statusCode = 400;
+        setResponseStatus(event, 400);
+
         return {
             ok: false,
-            error: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid code",
+            disconnected: false,
+            message: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid code",
         };
     }
 
@@ -44,9 +48,11 @@ export default defineEventHandler(async (event) => {
     const uuid = getCookie(event, "uuid");
 
     if (!uuid) {
-        event.node.res.statusCode = 500;
+        setResponseStatus(event, 400);
+
         return {
             ok: false,
+            disconnected: false,
             message: "Please, register first or click the link in the email you received to proceed",
         };
     }
@@ -54,13 +60,14 @@ export default defineEventHandler(async (event) => {
     const parseUuid = uuidSchema.safeParse(uuid);
 
     if (!parseUuid.success) {
-        event.node.res.statusCode = 400;
+        setResponseStatus(event, 400);
 
         deleteCookie(event, "uuid");
 
         return {
             ok: false,
-            error: parseUuid.error.issues[0] ? parseUuid.error.issues[0].path[0] : "Invalid request",
+            disconnected: true,
+            message: parseUuid.error.issues[0] ? parseUuid.error.issues[0].path[0] : "Invalid request",
         };
     }
 
@@ -82,78 +89,52 @@ export default defineEventHandler(async (event) => {
     };
 
     try {
-        const data: {
-            ok: boolean;
-            message: string;
-            data: {
-                refresh_token: string;
-                access_token: string;
-            };
-        } = await $fetch(`${config.backendBaseUrl}/account/register/verification`, {
-            method: "POST",
-            body: reqBody,
-        });
-
-        deleteCookie(event, "uuid");
-
-        setCookie(event, "access_token", data.data.access_token, {
-            httpOnly: true,
-            secure: config.nodeEnv === "production",
-            path: "/",
-            sameSite: "strict",
-            maxAge: 60 * 15,
-        });
-
-        setCookie(event, "refresh_token", data.data.refresh_token, {
-            httpOnly: true,
-            secure: config.nodeEnv === "production",
-            path: "/",
-            sameSite: "strict",
-            maxAge: 60 * 60 * 24 * 30,
-        });
-
-        event.node.res.statusCode = 200;
-
-        return {
-            ok: true,
-            message: data.message,
-        };
-    } catch (error) {
-        if (error instanceof FetchError) {
-            const err:
-                | {
-                      ok: boolean;
-                      error: {
-                          message: string;
-                          code: string;
-                      };
-                  }
-                | undefined = error.data;
-
-            if (!err) {
-                event.node.res.statusCode = 500;
-
-                return {
-                    ok: false,
-                    disconnected: false,
-                    message: "An error occured, please try again later",
+        return await handleError(event, async () => {
+            const data: {
+                ok: boolean;
+                message: string;
+                data: {
+                    refresh_token: string;
+                    access_token: string;
                 };
-            }
+            } = await $fetch(`${config.backendBaseUrl}/account/register/verification`, {
+                method: "POST",
+                body: reqBody,
+            });
 
-            event.node.res.statusCode = error.statusCode || 500;
+            deleteCookie(event, "uuid");
+
+            setCookie(event, "access_token", data.data.access_token, {
+                httpOnly: true,
+                secure: config.nodeEnv === "production",
+                path: "/",
+                sameSite: "strict",
+                maxAge: 60 * 15,
+            });
+
+            setCookie(event, "refresh_token", data.data.refresh_token, {
+                httpOnly: true,
+                secure: config.nodeEnv === "production",
+                path: "/",
+                sameSite: "strict",
+                maxAge: 60 * 60 * 24 * 30,
+            });
+
+            setResponseStatus(event, 200);
 
             return {
-                ok: false,
-                message: err.error.message,
-                code: err.error.code,
+                ok: true,
+                disconnected: true,
+                message: data.message,
             };
+        });
+    } catch (error) {
+        if (error instanceof Exception) {
+            return { ok: error.ok, disconnected: error.disconnected, message: error.message, code: error.code };
         }
 
-        event.node.res.statusCode = 500;
+        setResponseStatus(event, 500);
 
-        return {
-            ok: false,
-            message: "An error occured, please try again later",
-        };
+        return { ok: false, disconnected: false, message: "An error occured, please try again later" };
     }
 });

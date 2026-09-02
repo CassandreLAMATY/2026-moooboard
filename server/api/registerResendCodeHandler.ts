@@ -1,23 +1,27 @@
-import { FetchError } from "ofetch";
 import z from "zod";
+import { Exception } from "../core/errors/Exception";
+import handleError from "../middlewares/handleError";
 const config = useRuntimeConfig();
 
-const schema = z.uuid({
+const schema = z.uuidv4({
     error: `You must provide a valid UUID`,
 });
 
 export default defineEventHandler(async (event) => {
     if (event.node.req.method !== "POST") {
-        event.node.res.statusCode = 405;
-        return { ok: false, error: "Method not authorized" };
+        setResponseStatus(event, 405);
+
+        return { ok: false, disconnected: false, message: "Method not authorized" };
     }
 
     const uuid = getCookie(event, "uuid");
 
     if (!uuid) {
-        event.node.res.statusCode = 500;
+        setResponseStatus(event, 400);
+
         return {
             ok: false,
+            disconnected: false,
             message: "Can't find user's UUID",
         };
     }
@@ -25,10 +29,12 @@ export default defineEventHandler(async (event) => {
     const parseUuid = schema.safeParse(uuid);
 
     if (!parseUuid.success) {
-        event.node.res.statusCode = 400;
+        setResponseStatus(event, 400);
+
         return {
             ok: false,
-            error: parseUuid.error.issues[0] ? parseUuid.error.issues[0].path[0] : "Invalid request",
+            disconnected: false,
+            message: parseUuid.error.issues[0] ? parseUuid.error.issues[0].path[0] : "Invalid request",
         };
     }
 
@@ -41,58 +47,33 @@ export default defineEventHandler(async (event) => {
     };
 
     try {
-        const data: {
-            ok: boolean;
-            message: string;
-            data: {
-                uuid: string;
-            };
-        } = await $fetch(`${config.backendBaseUrl}/account/register/resend-code`, {
-            method: "POST",
-            body: reqBody,
-        });
-
-        event.node.res.statusCode = 200;
-
-        return {
-            ok: true,
-            message: data.message,
-        };
-    } catch (error) {
-        if (error instanceof FetchError) {
-            const err:
-                | {
-                      ok: boolean;
-                      error: {
-                          message: string;
-                          code: string;
-                      };
-                  }
-                | undefined = error.data;
-
-            if (!err) {
-                event.node.res.statusCode = 500;
-
-                return {
-                    ok: false,
-                    disconnected: false,
-                    message: "An error occured, please try again later",
+        return await handleError(event, async () => {
+            const data: {
+                ok: boolean;
+                message: string;
+                data: {
+                    uuid: string;
                 };
-            }
+            } = await $fetch(`${config.backendBaseUrl}/account/register/resend-code`, {
+                method: "POST",
+                body: reqBody,
+            });
 
-            event.node.res.statusCode = error.statusCode || 500;
+            setResponseStatus(event, 200);
 
             return {
-                ok: false,
-                message: err.error.message,
+                ok: true,
+                disconnected: false,
+                message: data.message,
             };
+        });
+    } catch (error) {
+        if (error instanceof Exception) {
+            return { ok: error.ok, disconnected: error.disconnected, message: error.message, code: error.code };
         }
 
-        event.node.res.statusCode = 500;
+        setResponseStatus(event, 500);
 
-        return {
-            ok: false,
-            message: "An error occured, please try again later",
-        };
+        return { ok: false, disconnected: false, message: "An error occured, please try again later" };
     }
 });

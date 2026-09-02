@@ -1,118 +1,46 @@
-import { FetchError } from "ofetch";
-import { AppException } from "../core/errors/AppException";
+import { Exception } from "../core/errors/Exception";
+import handleError from "../middlewares/handleError";
+import requireAccessToken from "../middlewares/requireAccessToken";
 const config = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
     if (event.node.req.method !== "POST") {
-        event.node.res.statusCode = 405;
-        return { ok: false, error: "Method not authorized" };
+        setResponseStatus(event, 405);
+
+        return { ok: false, disconnected: false, message: "Method not authorized" };
     }
 
-    let accessToken = getCookie(event, "access_token");
+    try {
+        return await handleError(event, async () => {
+            const accessToken = await requireAccessToken(event);
 
-    if (!accessToken) {
-        const refreshToken = getCookie(event, "refresh_token");
+            const data: {
+                ok: boolean;
+                message: string;
+            } = await $fetch(`${config.backendBaseUrl}/auth/logout`, {
+                method: "POST",
+                headers: {
+                    authorization: `Bearer ${accessToken}`,
+                },
+            });
 
-        if (!refreshToken) {
-            event.node.res.statusCode = 500;
-
-            return {
-                ok: false,
-                message: "You are already not connected",
-            };
-        }
-
-        try {
-            const data = await refreshSession(refreshToken);
-
-            accessToken = data.accessToken;
-        } catch (error) {
-            event.node.res.statusCode = 500;
+            setResponseStatus(event, 200);
 
             deleteCookie(event, "access_token");
             deleteCookie(event, "refresh_token");
 
-            if (error instanceof AppException) {
-                if (error.code === "E6000") {
-                    return {
-                        ok: false,
-                        message:
-                            "An error occured while attempting to refresh your session. Don't worry, you still have been disconnected on client side",
-                    };
-                }
-
-                return {
-                    ok: false,
-                    message: `${error.message}. Don't worry, you still have been disconnected on client side`,
-                };
-            }
-
             return {
-                ok: false,
-                message: `An error occured while attempting to refresh your session. Don't worry, you still have been disconnected on client side`,
+                ok: true,
+                message: data.message,
             };
-        }
-    }
-
-    try {
-        verifyAccessToken(accessToken);
-
-        const data: {
-            ok: boolean;
-            message: string;
-        } = await $fetch(`${config.backendBaseUrl}/auth/logout`, {
-            method: "POST",
-            body: {
-                access_token: accessToken,
-            },
         });
-
-        event.node.res.statusCode = 200;
-
-        deleteCookie(event, "access_token");
-        deleteCookie(event, "refresh_token");
-
-        return {
-            ok: true,
-            message: data.message,
-        };
     } catch (error) {
-        deleteCookie(event, "access_token");
-        deleteCookie(event, "refresh_token");
-
-        if (error instanceof FetchError) {
-            const err:
-                | {
-                      ok: boolean;
-                      error: {
-                          message: string;
-                          code: string;
-                      };
-                  }
-                | undefined = error.data;
-
-            if (!err) {
-                event.node.res.statusCode = 500;
-
-                return {
-                    ok: false,
-                    message: "An error occured. Don't worry, you still have been disconnected on client side",
-                };
-            }
-
-            event.node.res.statusCode = error.statusCode || 500;
-
-            return {
-                ok: false,
-                message: `${err.error.message}. Don't worry, you still have been disconnected on client side`,
-            };
+        if (error instanceof Exception) {
+            return { ok: error.ok, disconnected: error.disconnected, message: error.message, code: error.code };
         }
 
-        event.node.res.statusCode = 500;
+        setResponseStatus(event, 500);
 
-        return {
-            ok: false,
-            message: "An error occured. Don't worry, you still have been disconnected on client side",
-        };
+        return { ok: false, disconnected: false, message: "An error occured, please try again later" };
     }
 });

@@ -1,6 +1,6 @@
+import requireAccessToken from "../middlewares/requireAccessToken";
 import { Exception } from "../core/errors/Exception";
 import handleError from "../middlewares/handleError";
-import requireAccessToken from "../middlewares/requireAccessToken";
 const config = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
@@ -18,15 +18,12 @@ export default defineEventHandler(async (event) => {
                 ok: boolean;
                 message: string;
                 data: {
-                    user: {
-                        uuid: string;
-                        username: string;
-                        email: string;
-                        role: string;
-                        status: string;
-                        created_at: Date;
-                        updated_at: Date;
-                    };
+                    buddies: {
+                        id: number;
+                        name: string;
+                        formatted_name: string;
+                        image_base_url: string;
+                    }[];
                 };
             } = await $fetch(`${config.backendBaseUrl}/user/me`, {
                 method: "GET",
@@ -41,7 +38,7 @@ export default defineEventHandler(async (event) => {
                 ok: true,
                 disconnected: false,
                 message: data.message,
-                data: data.data.user,
+                data: data.data.buddies,
             };
         });
     } catch (error) {

@@ -1,18 +1,25 @@
 export default defineEventHandler(async (event) => {
-    if (event.node.req.method !== "GET") {
-        event.node.res.statusCode = 405;
-        return { ok: false, error: "Method not authorized" };
+    if (event.req.method !== "GET") {
+        setResponseStatus(event, 405);
+
+        return { ok: false, disconnected: false, message: "Method not authorized" };
     }
 
     const refreshToken = getCookie(event, "refresh_token");
 
     if (!refreshToken) {
         return {
-            isConnected: false,
+            ok: true,
+            disconnected: false,
+            message: "User not connected",
+            data: { isConnected: false },
         };
     }
 
     return {
-        isConnected: true,
+        ok: true,
+        disconnected: false,
+        message: "User connected",
+        data: { isConnected: true },
     };
 });

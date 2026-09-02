@@ -1,150 +1,162 @@
 <script setup lang="ts">
-const initFocus = [0, 45, 0];
-const initRelax = [0, 15, 0];
-const hasHours = ref(initFocus[0] === 0 && initRelax[0] === 0 ? false : true);
+    const emit = defineEmits<{
+        (event: "openSettings"): void;
+    }>();
 
-const timer = ref([...initFocus]);
+    const initFocus = [0, 45, 0];
+    const initRelax = [0, 15, 0];
+    const hasHours = ref(initFocus[0] === 0 && initRelax[0] === 0 ? false : true);
 
-const totalSessionTime = ref(getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!));
-const sessionTime = ref(0);
+    const timer = ref([...initFocus]);
 
-const isFocusPlaying = ref(true);
-const isAnimationPaused = ref(true);
+    const totalSessionTime = ref(getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!));
+    const sessionTime = ref(0);
 
-const isFrame1Displayed = ref(true);
+    const isFocusPlaying = ref(true);
+    const isAnimationPaused = ref(true);
 
-const gradientAngle = computed(() => {
-    if (!totalSessionTime.value) {
-        return 0;
+    const isFrame1Displayed = ref(true);
+
+    const gradientAngle = computed(() => {
+        if (!totalSessionTime.value) {
+            return 0;
+        }
+
+        const elapsed = totalSessionTime.value - sessionTime.value;
+
+        return (elapsed / totalSessionTime.value) * 360;
+    });
+
+    const interval: Ref<NodeJS.Timeout | undefined> = ref(undefined);
+    const iconTimeout: Ref<NodeJS.Timeout | undefined> = ref(undefined);
+
+    function initSessionTime() {
+        sessionTime.value = totalSessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
     }
 
-    const elapsed = totalSessionTime.value - sessionTime.value;
+    function setIconTimeout() {
+        iconTimeout.value = setTimeout(
+            () => {
+                isFrame1Displayed.value = !isFrame1Displayed.value;
 
-    return (elapsed / totalSessionTime.value) * 360;
-});
+                setIconTimeout();
+            },
+            (Math.random() * (3 - 0.5) + 0.5) * 1000,
+        );
+    }
 
-const interval: Ref<NodeJS.Timeout | undefined> = ref(undefined);
-const iconTimeout: Ref<NodeJS.Timeout | undefined> = ref(undefined);
+    function setSessionInterval() {
+        interval.value = setInterval(() => {
+            if (timer.value[0] === 0 && timer.value[1] === 0 && timer.value[2] === 0) {
+                isFocusPlaying.value = !isFocusPlaying.value;
 
-function initSessionTime() {
-    sessionTime.value = totalSessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
-}
+                if (isFocusPlaying.value) {
+                    timer.value = [...initFocus];
+                    initSessionTime();
 
-function setIconTimeout() {
-    iconTimeout.value = setTimeout(
-        () => {
-            isFrame1Displayed.value = !isFrame1Displayed.value;
+                    return;
+                }
 
-            setIconTimeout();
-        },
-        (Math.random() * (3 - 0.5) + 0.5) * 1000,
-    );
-}
-
-function setSessionInterval() {
-    interval.value = setInterval(() => {
-        if (timer.value[0] === 0 && timer.value[1] === 0 && timer.value[2] === 0) {
-            isFocusPlaying.value = !isFocusPlaying.value;
-
-            if (isFocusPlaying.value) {
-                timer.value = [...initFocus];
+                timer.value = [...initRelax];
                 initSessionTime();
 
                 return;
             }
 
-            timer.value = [...initRelax];
+            if (timer.value[2] === 0 && timer.value[1]! > 0) {
+                timer.value[2] = 59;
+                timer.value[1]! -= 1;
+                sessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
+
+                return;
+            }
+
+            if (timer.value[2] === 0 && timer.value[0]! > 0) {
+                timer.value[2] = 59;
+                timer.value[1] = 59;
+                timer.value[0]! -= 1;
+                sessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
+
+                return;
+            }
+
+            timer.value[2]! -= 1;
+            sessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
+        }, 1000);
+    }
+
+    function startSession() {
+        if (!isAnimationPaused.value) {
+            isAnimationPaused.value = true;
+
+            clearInterval(interval.value);
+            clearTimeout(iconTimeout.value);
+            return;
+        }
+
+        if (sessionTime.value <= 0) {
             initSessionTime();
-
-            return;
         }
 
-        if (timer.value[2] === 0 && timer.value[1]! > 0) {
-            timer.value[2] = 59;
-            timer.value[1]! -= 1;
-            sessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
+        isAnimationPaused.value = false;
 
-            return;
+        if (interval.value) clearInterval(interval.value);
+        if (iconTimeout.value) clearTimeout(iconTimeout.value);
+
+        setSessionInterval();
+        setIconTimeout();
+    }
+
+    function skipSession() {
+        if (interval.value) clearInterval(interval.value);
+        if (iconTimeout.value) clearTimeout(iconTimeout.value);
+
+        isFocusPlaying.value = !isFocusPlaying.value;
+
+        if (isFocusPlaying.value) {
+            timer.value = [...initFocus];
+        } else {
+            timer.value = [...initRelax];
         }
 
-        if (timer.value[2] === 0 && timer.value[0]! > 0) {
-            timer.value[2] = 59;
-            timer.value[1] = 59;
-            timer.value[0]! -= 1;
-            sessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
+        initSessionTime();
 
-            return;
-        }
+        if (isAnimationPaused.value) return;
 
-        timer.value[2]! -= 1;
-        sessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
-    }, 1000);
-}
+        setSessionInterval();
+        setIconTimeout();
+    }
 
-function startSession() {
-    if (!isAnimationPaused.value) {
+    function resetSession() {
         isAnimationPaused.value = true;
 
-        clearInterval(interval.value);
-        clearTimeout(iconTimeout.value);
-        return;
-    }
+        if (interval.value) clearInterval(interval.value);
+        if (iconTimeout.value) clearTimeout(iconTimeout.value);
 
-    if (sessionTime.value <= 0) {
+        if (isFocusPlaying.value) {
+            timer.value = [...initFocus];
+        } else {
+            timer.value = [...initRelax];
+        }
+
         initSessionTime();
     }
-
-    isAnimationPaused.value = false;
-
-    if (interval.value) clearInterval(interval.value);
-    if (iconTimeout.value) clearTimeout(iconTimeout.value);
-
-    setSessionInterval();
-    setIconTimeout();
-}
-
-function skipSession() {
-    if (interval.value) clearInterval(interval.value);
-    if (iconTimeout.value) clearTimeout(iconTimeout.value);
-
-    isFocusPlaying.value = !isFocusPlaying.value;
-
-    if (isFocusPlaying.value) {
-        timer.value = [...initFocus];
-    } else {
-        timer.value = [...initRelax];
-    }
-
-    initSessionTime();
-
-    if (isAnimationPaused.value) return;
-
-    setSessionInterval();
-    setIconTimeout();
-}
-
-function resetSession() {
-    isAnimationPaused.value = true;
-
-    if (interval.value) clearInterval(interval.value);
-    if (iconTimeout.value) clearTimeout(iconTimeout.value);
-
-    if (isFocusPlaying.value) {
-        timer.value = [...initFocus];
-    } else {
-        timer.value = [...initRelax];
-    }
-
-    initSessionTime();
-}
 </script>
 
 <template>
     <div class="pomodoro-section">
         <div class="header">
             <span class="font04 silk01">Pomodoro Timer</span>
-            <button class="btn-round settings" type="button">
-                <img src="/images/gear-white-02-16.svg" alt="Gear icon" />
+
+            <button
+                class="btn-round settings"
+                type="button"
+                @click="$emit('openSettings')"
+            >
+                <img
+                    src="/images/gear-white-02-16.svg"
+                    alt="Gear icon"
+                />
             </button>
         </div>
 
@@ -155,8 +167,16 @@ function resetSession() {
                     :style="{ '--angle': `${gradientAngle}deg` }"
                 ></div>
                 <div class="icon-container">
-                    <img v-if="isFrame1Displayed" src="/images/pomodoro/cow01.svg" alt="Cow icon" />
-                    <img v-else src="/images/pomodoro/cow02.svg" alt="Cow icon" />
+                    <img
+                        v-if="isFrame1Displayed"
+                        src="/images/pomodoro/cow01.svg"
+                        alt="Cow icon"
+                    />
+                    <img
+                        v-else
+                        src="/images/pomodoro/cow02.svg"
+                        alt="Cow icon"
+                    />
                 </div>
             </div>
 
@@ -183,7 +203,12 @@ function resetSession() {
                         type="button"
                         @click="resetSession()"
                     >
-                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
                             <path d="M12 1.33337H6.66669V2.66671H12V1.33337Z" />
                             <path d="M6.66665 2.66675H5.33331V4.00008H6.66665V2.66675Z" />
                             <path d="M14.6667 2.66675V5.33341H13.3333V4.00008H12V2.66675H14.6667Z" />
@@ -216,7 +241,13 @@ function resetSession() {
                             />
                         </svg>
 
-                        <svg v-else width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <svg
+                            v-else
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
                             <path d="M5.99998 2.66663H3.33331V13.3333H5.99998V2.66663Z" />
                             <path d="M12.6667 2.66663H10V13.3333H12.6667V2.66663Z" />
                         </svg>
@@ -227,7 +258,12 @@ function resetSession() {
                         type="button"
                         @click="skipSession()"
                     >
-                        <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
                             <path
                                 d="M12.6667 7.33333V8.66667H11.3334V10H8.66669V11.3333H6.00002V12.6667H3.33335V14H0.666687V2H3.33335V3.33333H6.00002V4.66667H8.66669V6H11.3334V7.33333H12.6667Z"
                             />
@@ -241,5 +277,5 @@ function resetSession() {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/pomodoroSection.scss";
+    @use "~/assets/scss/pomodoroSection.scss";
 </style>

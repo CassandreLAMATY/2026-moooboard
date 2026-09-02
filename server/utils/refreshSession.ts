@@ -1,6 +1,5 @@
 import { FetchError } from "ofetch";
 import { AppException } from "../core/errors/AppException";
-import verifyRefreshToken from "./verifyRefreshToken";
 
 const config = useRuntimeConfig();
 
@@ -8,8 +7,6 @@ export default async function refreshSession(
     refreshToken: string,
 ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-        verifyRefreshToken(refreshToken);
-
         const data: {
             ok: boolean;
             message: string;
@@ -18,9 +15,9 @@ export default async function refreshSession(
                 access_token: string;
             };
         } = await $fetch(`${config.backendBaseUrl}/session/refresh`, {
-            method: "POST",
-            body: {
-                refresh_token: refreshToken,
+            method: "GET",
+            headers: {
+                authorization: `Bearer ${refreshToken}`,
             },
         });
 
