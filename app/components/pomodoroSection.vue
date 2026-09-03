@@ -34,17 +34,6 @@
         sessionTime.value = totalSessionTime.value = getSessionTime(timer.value[0]!, timer.value[1]!, timer.value[2]!);
     }
 
-    function setIconTimeout() {
-        iconTimeout.value = setTimeout(
-            () => {
-                isFrame1Displayed.value = !isFrame1Displayed.value;
-
-                setIconTimeout();
-            },
-            (Math.random() * (3 - 0.5) + 0.5) * 1000,
-        );
-    }
-
     function setSessionInterval() {
         interval.value = setInterval(() => {
             if (timer.value[0] === 0 && timer.value[1] === 0 && timer.value[2] === 0) {
@@ -104,7 +93,7 @@
         if (iconTimeout.value) clearTimeout(iconTimeout.value);
 
         setSessionInterval();
-        setIconTimeout();
+        setIconTimeout(iconTimeout, isFrame1Displayed);
     }
 
     function skipSession() {
@@ -124,7 +113,7 @@
         if (isAnimationPaused.value) return;
 
         setSessionInterval();
-        setIconTimeout();
+        setIconTimeout(iconTimeout, isFrame1Displayed);
     }
 
     function resetSession() {
