@@ -34,7 +34,12 @@ export default defineEventHandler(async (event) => {
         return {
             ok: false,
             disconnected: false,
-            message: parseUuid.error.issues[0] ? parseUuid.error.issues[0].path[0] : "Invalid request",
+            message:
+                parseUuid.error.issues[0] && parseUuid.error.issues[0].path[0]
+                    ? parseUuid.error.issues[0].path[0]
+                    : parseUuid.error.issues[0]
+                      ? parseUuid.error.issues[0].message
+                      : "Invalid request",
         };
     }
 

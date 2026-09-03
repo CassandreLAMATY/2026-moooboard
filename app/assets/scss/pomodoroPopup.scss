@@ -216,12 +216,45 @@
                         justify-content: space-between;
                         gap: s.$size-01;
 
-                        @include m.media-max--width(501px) {
-                            &::after {
-                                content: "";
+                        &.loading {
+                            justify-content: center;
 
-                                width: s.$size07;
-                                height: s.$size07;
+                            width: 100%;
+                            min-height: 204px;
+                        }
+
+                        @include m.media-max--width(501px) {
+                            &.loading {
+                                min-height: 312px;
+                            }
+
+                            &:not(.loading) {
+                                &::after {
+                                    content: "";
+
+                                    width: s.$size07;
+                                    height: s.$size07;
+                                }
+                            }
+                        }
+
+                        & > svg {
+                            & > .dot01 {
+                                animation-name: dot01;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+
+                            & > .dot02 {
+                                animation-name: dot02;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
+                            }
+
+                            & > .dot03 {
+                                animation-name: dot03;
+                                animation-duration: 3s;
+                                animation-iteration-count: infinite;
                             }
                         }
                     }
@@ -317,5 +350,62 @@
                 }
             }
         }
+    }
+}
+
+@keyframes dot01 {
+    0% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
+    }
+}
+
+@keyframes dot02 {
+    0% {
+        opacity: 0%;
+    }
+    24% {
+        opacity: 0%;
+    }
+    25% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
+    }
+}
+
+@keyframes dot03 {
+    0% {
+        opacity: 0%;
+    }
+    49% {
+        opacity: 0%;
+    }
+    50% {
+        opacity: 100%;
+    }
+    74% {
+        opacity: 100%;
+    }
+    75% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 0%;
     }
 }

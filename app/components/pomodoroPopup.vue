@@ -1,22 +1,37 @@
 <script setup lang="ts">
-    import Switch from "./switch.vue";
+    const emit = defineEmits<{
+        (event: "close"): void;
+    }>();
+
+    const { buddies, selectedBuddy, fetchBuddies, updateSelectedBuddy } = useBuddies();
+
+    const selectedBuddyId = ref(selectedBuddy.value.id);
+    const buddiesIsLoading = ref(true);
 
     const submitIsLoading = ref(false);
 
     const focus = ref(45);
     const relax = ref(15);
 
-    const buddies = [
-        { id: 0, name: "Hungry Cow", formatted_name: "hungry-cow", image_base_url: "/images/pomodoro/cow" },
-        { id: 1, name: "Sleepy Platy.", formatted_name: "sleepy-platy", image_base_url: "/images/pomodoro/platypus" },
-        { id: 2, name: "Thirsty Cam.", formatted_name: "thirsty-cam", image_base_url: "/images/pomodoro/camel" },
-        { id: 3, name: "Car", formatted_name: "car", image_base_url: "/images/pomodoro/cat" },
-        { id: 4, name: "Cute Zibzorg", formatted_name: "cute-zibzorg", image_base_url: "/images/pomodoro/zibzorg" },
-        { id: 5, name: "Rock", formatted_name: "rock", image_base_url: "/images/pomodoro/rock" },
-        { id: 6, name: "Hot-Dog", formatted_name: "hot-dog", image_base_url: "/images/pomodoro/dog" },
-        { id: 7, name: "Wet Snail", formatted_name: "wet-snail", image_base_url: "/images/pomodoro/snail" },
-    ];
-    const selectedBuddy = ref(0);
+    async function submit() {
+        submitIsLoading.value = true;
+
+        const buddy = buddies.value.filter((b) => b.id === selectedBuddyId.value)[0];
+
+        if (buddy) {
+            await updateSelectedBuddy(buddy);
+        }
+
+        submitIsLoading.value = false;
+
+        emit("close");
+    }
+
+    onMounted(async () => {
+        await fetchBuddies().then(() => {
+            buddiesIsLoading.value = false;
+        });
+    });
 </script>
 
 <template>
@@ -42,7 +57,7 @@
                 </button>
             </div>
 
-            <form>
+            <form @submit.prevent="submit()">
                 <div class="content">
                     <div class="top">
                         <div class="container">
@@ -151,16 +166,41 @@
                             >Choose your focus session buddy</label
                         >
 
-                        <div class="container">
+                        <div :class="['container', buddiesIsLoading ? 'loading' : '']">
+                            <svg
+                                v-if="buddiesIsLoading"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    class="dot01"
+                                    d="M6 10H2V14H6V10Z"
+                                    fill="#8F8C8F"
+                                />
+                                <path
+                                    class="dot02"
+                                    d="M14 10H10V14H14V10Z"
+                                    fill="#8F8C8F"
+                                />
+                                <path
+                                    class="dot03"
+                                    d="M22 10H18V14H22V10Z"
+                                    fill="#8F8C8F"
+                                />
+                            </svg>
                             <PomodoroBuddy
+                                v-else
                                 v-for="b in buddies"
                                 :id="b.id"
                                 :src="b.image_base_url"
                                 :name="b.name"
                                 :inputId="b.formatted_name"
                                 inputName="buddy"
-                                :checked="b.id === selectedBuddy ? true : false"
-                                @checked="(id) => (selectedBuddy = id)"
+                                :checked="b.id === selectedBuddyId ? true : false"
+                                @checked="(id) => (selectedBuddyId = id)"
                             />
                         </div>
                     </div>

@@ -46,7 +46,13 @@ export default defineEventHandler(async (event) => {
 
         return {
             ok: false,
-            error: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid registration form",
+            disconnected: false,
+            message:
+                parseBody.error.issues[0] && parseBody.error.issues[0].path[0]
+                    ? parseBody.error.issues[0].path[0]
+                    : parseBody.error.issues[0]
+                      ? parseBody.error.issues[0].message
+                      : "Invalid registration form",
         };
     }
 

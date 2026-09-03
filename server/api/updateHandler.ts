@@ -1,30 +1,22 @@
 import z from "zod";
 import { Exception } from "../core/errors/Exception";
 import handleError from "../middlewares/handleError";
+import requireAccessToken from "../middlewares/requireAccessToken";
 const config = useRuntimeConfig();
 
 const schema = z.object({
-    email: z
-        .email({ error: "Field email must contain a valid email address" })
-        .max(256, { error: "Field email must contain at most 256 characters" }),
-
-    password: z
+    username: z
         .string({
-            error: 'Field password must be of type "string"',
+            error: 'Field username must be of type "string"',
         })
-        .min(8, {
-            error: "Field password must contain at least 8 characters",
-        })
-        .max(32, {
-            error: "Field password must contain at most 32 characters",
-        })
-        .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[_#?!@$%^&*-])[a-zA-Z0-9_#?!@$%^&*-]+$/, {
-            error: "Field password can only contain letters, numbers, and _#?!@$%^&*-",
-        }),
+        .min(3, { error: "Field username must contain at least 3 characters" })
+        .max(16, { error: "Field username must contain at most 16 characters" })
+        .optional(),
+    buddy_id: z.number({ error: "Field buddy_id must be a number" }).optional(),
 });
 
 export default defineEventHandler(async (event) => {
-    if (event.node.req.method !== "POST") {
+    if (event.node.req.method !== "PUT") {
         setResponseStatus(event, 405);
 
         return { ok: false, disconnected: false, message: "Method not authorized" };
@@ -44,46 +36,48 @@ export default defineEventHandler(async (event) => {
                     ? parseBody.error.issues[0].path[0]
                     : parseBody.error.issues[0]
                       ? parseBody.error.issues[0].message
-                      : "Invalid login form",
+                      : "Invalid request",
         };
     }
 
     const reqBody = {
-        email: parseBody.data.email,
-        password: parseBody.data.password,
-        app_source: {
-            name: config.appName,
-            email: config.appEmail,
-        },
+        username: parseBody.data.username,
+        buddy_id: parseBody.data.buddy_id,
     };
 
     try {
         return await handleError(event, async () => {
+            const accessToken = await requireAccessToken(event);
+
             const data: {
                 ok: boolean;
                 message: string;
                 data: {
-                    uuid: string;
+                    user: {
+                        username: string;
+                        buddy: {
+                            id: number;
+                            name: string;
+                            formatted_name: string;
+                            image_base_url: string;
+                        };
+                    };
                 };
-            } = await $fetch(`${config.backendBaseUrl}/auth/login/send-code`, {
-                method: "POST",
+            } = await $fetch(`${config.backendBaseUrl}/account/update`, {
+                method: "PUT",
+                headers: {
+                    authorization: `Bearer ${accessToken}`,
+                },
                 body: reqBody,
-            });
-
-            setCookie(event, "authentication_uuid", data.data.uuid, {
-                httpOnly: true,
-                secure: config.nodeEnv === "production",
-                path: "/",
-                sameSite: "strict",
-                maxAge: 60 * 10,
             });
 
             setResponseStatus(event, 200);
 
             return {
                 ok: true,
-                disconnectted: false,
+                disconnected: false,
                 message: data.message,
+                data: data.data.user,
             };
         });
     } catch (error) {

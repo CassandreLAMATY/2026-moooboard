@@ -21,9 +21,14 @@ export default defineEventHandler(async (event) => {
                     user: {
                         uuid: string;
                         username: string;
-                        email: string;
                         role: string;
                         status: string;
+                        buddy: {
+                            id: number;
+                            name: string;
+                            formatted_name: string;
+                            image_base_url: string;
+                        };
                         created_at: Date;
                         updated_at: Date;
                     };

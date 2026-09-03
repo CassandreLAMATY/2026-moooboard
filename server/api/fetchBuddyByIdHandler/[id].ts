@@ -1,5 +1,5 @@
-import { Exception } from "../core/errors/Exception";
-import handleError from "../middlewares/handleError";
+import { Exception } from "../../core/errors/Exception";
+import handleError from "../../middlewares/handleError";
 const config = useRuntimeConfig();
 
 export default defineEventHandler(async (event) => {
@@ -9,20 +9,24 @@ export default defineEventHandler(async (event) => {
         return { ok: false, disconnected: false, message: "Method not authorized" };
     }
 
+    const id = event.context.params?.id;
+    if (!id || (id && Number.isNaN(Number.parseInt(id))))
+        return { ok: false, disconnected: false, message: "Please provide a valid id" };
+
     try {
         return await handleError(event, async () => {
-            const data: {
+            const res: {
                 ok: boolean;
                 message: string;
                 data: {
-                    buddies: {
+                    buddy: {
                         id: number;
                         name: string;
                         formatted_name: string;
                         image_base_url: string;
-                    }[];
+                    };
                 };
-            } = await $fetch(`${config.backendBaseUrl}/buddies`, {
+            } = await $fetch(`${config.backendBaseUrl}/buddies/${id}`, {
                 method: "GET",
             });
 
@@ -31,8 +35,8 @@ export default defineEventHandler(async (event) => {
             return {
                 ok: true,
                 disconnected: false,
-                message: data.message,
-                data: data.data.buddies,
+                message: res.message,
+                data: res.data.buddy,
             };
         });
     } catch (error) {

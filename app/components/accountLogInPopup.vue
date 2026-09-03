@@ -1,130 +1,147 @@
 <script setup lang="ts">
-import { FetchError } from "ofetch";
-import { signInEmailSchema, signInLoginPasswordSchema } from "~/schemas/signInSchemas";
-import type { Notification } from "~/types/notification";
+    import { FetchError } from "ofetch";
+    import { signInEmailSchema } from "~/schemas/signInSchemas";
 
-const emit = defineEmits<{
-    (event: "notify", payload: Notification): void;
-    (event: "submit", payload: { email: string; type: "login" }): void;
-    (event: "openRegister"): void;
-    (event: "close"): void;
-}>();
+    const emit = defineEmits<{
+        (event: "submit", payload: { email: string; type: "login" }): void;
+        (event: "openRegister"): void;
+        (event: "close"): void;
+    }>();
 
-const email = ref("");
-const password = ref("");
+    const { addNotification } = useNotification();
 
-const emailIsValid = ref(false);
-const passwordIsValid = ref(false);
+    const email = ref("");
+    const password = ref("");
 
-const emailError = ref("");
-const passwordError = ref("");
+    const emailIsValid = ref(false);
+    const passwordIsValid = ref(false);
 
-// Password handling
+    const emailError = ref("");
+    const passwordError = ref("");
 
-const isPasswordDisplayed = ref(false);
+    // Password handling
 
-const hasBeenFocus = ref(false);
-const hasBeenBlur = ref(false);
+    const isPasswordDisplayed = ref(false);
 
-function focusPassword() {
-    hasBeenFocus.value = true;
-    passwordError.value = "";
-}
+    const hasBeenFocus = ref(false);
+    const hasBeenBlur = ref(false);
 
-//---
-// Submit
+    function focusPassword() {
+        hasBeenFocus.value = true;
+        passwordError.value = "";
+    }
 
-const submitIsLoading = ref(false);
+    //---
+    // Submit
 
-async function submit() {
-    if (submitIsLoading.value) return;
+    const submitIsLoading = ref(false);
 
-    if (emailIsValid.value && password.value.length > 0) {
-        try {
-            submitIsLoading.value = true;
+    async function submit() {
+        if (submitIsLoading.value) return;
 
-            await $fetch("/api/loginSendCodeHandler", {
-                method: "POST",
-                body: {
-                    email: email.value,
-                    password: password.value,
-                },
-            });
+        if (emailIsValid.value && password.value.length > 0) {
+            try {
+                submitIsLoading.value = true;
 
-            emit("submit", { email: email.value, type: "login" });
-        } catch (error) {
-            submitIsLoading.value = false;
-
-            if (error instanceof FetchError) {
-                const err: {
-                    ok: boolean;
-                    message: string;
-                } = error.data;
-
-                emit("notify", {
-                    title: "An error occured",
-                    type: "error",
-                    message: err.message,
+                await $fetch("/api/loginSendCodeHandler", {
+                    method: "POST",
+                    body: {
+                        email: email.value,
+                        password: password.value,
+                    },
                 });
 
-                return;
+                emit("submit", { email: email.value, type: "login" });
+            } catch (error) {
+                submitIsLoading.value = false;
+
+                if (error instanceof FetchError) {
+                    const err: {
+                        ok: boolean;
+                        message: string;
+                    } = error.data;
+
+                    addNotification({
+                        title: "An error occured",
+                        type: "error",
+                        message: err.message,
+                    });
+
+                    return;
+                }
+
+                addNotification({
+                    title: "An error occured",
+                    type: "error",
+                    message: "An error occured while attempting to log you in. Please, try again later",
+                });
+
+                emit("close");
             }
 
-            emit("notify", {
-                title: "An error occured",
-                type: "error",
-                message: "An error occured while attempting to log you in. Please, try again later",
-            });
-            emit("close");
+            return;
         }
+
+        if (password.value.length === 0) {
+            passwordIsValid.value = false;
+            passwordError.value = "This field must contain a valid password";
+        }
+
+        checkField(email.value, emailError, "email");
 
         return;
     }
 
-    if (password.value.length === 0) {
-        passwordIsValid.value = false;
-        passwordError.value = "This field must contain a valid password";
-    }
+    watch(email, () => {
+        try {
+            signInEmailSchema.parse(email.value);
 
-    checkField(email.value, emailError, "email");
+            emailIsValid.value = true;
+        } catch (error) {
+            emailIsValid.value = false;
+        }
+    });
 
-    return;
-}
-
-watch(email, () => {
-    try {
-        signInEmailSchema.parse(email.value);
-
-        emailIsValid.value = true;
-    } catch (error) {
-        emailIsValid.value = false;
-    }
-});
-
-watch(password, () => {
-    try {
-        passwordIsValid.value = true;
-    } catch (error) {
-        passwordIsValid.value = false;
-    }
-});
+    watch(password, () => {
+        try {
+            passwordIsValid.value = true;
+        } catch (error) {
+            passwordIsValid.value = false;
+        }
+    });
 </script>
 
 <template>
-    <div class="popup-container" @click="$emit('close')">
-        <div class="popup" @click.stop>
+    <div
+        class="popup-container"
+        @click="$emit('close')"
+    >
+        <div
+            class="popup"
+            @click.stop
+        >
             <div class="header-container">
                 <div class="header">
                     <span class="font04 silk01">Sign in</span>
 
-                    <button type="button" @click="$emit('close')">
-                        <img src="/images/xmark.svg" alt="Xmark icon" />
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                    >
+                        <img
+                            src="/images/xmark.svg"
+                            alt="Xmark icon"
+                        />
                     </button>
                 </div>
 
                 <span class="font02 micro02">
                     Don’t have an account yet ?
-                    <span class="login" @click="$emit('openRegister')">Create one here</span>
+                    <span
+                        class="login"
+                        @click="$emit('openRegister')"
+                        >Create one here</span
+                    >
                 </span>
             </div>
 
@@ -132,7 +149,10 @@ watch(password, () => {
                 <div class="group">
                     <div class="container">
                         <div class="input-container">
-                            <label class="font06 silk02" for="email">
+                            <label
+                                class="font06 silk02"
+                                for="email"
+                            >
                                 <span :class="emailError ? 'err' : ''">*</span> Email address
                             </label>
 
@@ -146,8 +166,16 @@ watch(password, () => {
                                     placeholder="john.doe@domain.com"
                                     @focus="emailError = ''"
                                 />
-                                <img v-if="emailIsValid" src="/images/check.svg" alt="Check icon" />
-                                <img v-if="emailError" src="/images/xmark-red.svg" alt="Xmark icon" />
+                                <img
+                                    v-if="emailIsValid"
+                                    src="/images/check.svg"
+                                    alt="Check icon"
+                                />
+                                <img
+                                    v-if="emailError"
+                                    src="/images/xmark-red.svg"
+                                    alt="Xmark icon"
+                                />
                             </div>
                         </div>
 
@@ -158,11 +186,27 @@ watch(password, () => {
                         <div class="container">
                             <div class="input-container">
                                 <div class="input-header">
-                                    <label class="font06 silk02" for="password"> <span>*</span> Password </label>
+                                    <label
+                                        class="font06 silk02"
+                                        for="password"
+                                    >
+                                        <span>*</span> Password
+                                    </label>
 
-                                    <button type="button" @click="isPasswordDisplayed = !isPasswordDisplayed">
-                                        <img v-if="!isPasswordDisplayed" src="/images/eye.svg" alt="Eye icon" />
-                                        <img v-else src="/images/eye-close.svg" alt="Closed eye icon" />
+                                    <button
+                                        type="button"
+                                        @click="isPasswordDisplayed = !isPasswordDisplayed"
+                                    >
+                                        <img
+                                            v-if="!isPasswordDisplayed"
+                                            src="/images/eye.svg"
+                                            alt="Eye icon"
+                                        />
+                                        <img
+                                            v-else
+                                            src="/images/eye-close.svg"
+                                            alt="Closed eye icon"
+                                        />
                                     </button>
                                 </div>
 
@@ -176,7 +220,11 @@ watch(password, () => {
                                         @focus="focusPassword()"
                                         @blur="hasBeenBlur = true"
                                     />
-                                    <img v-if="passwordError" src="/images/xmark-red.svg" alt="Xmark icon" />
+                                    <img
+                                        v-if="passwordError"
+                                        src="/images/xmark-red.svg"
+                                        alt="Xmark icon"
+                                    />
                                 </div>
                             </div>
 
@@ -186,11 +234,17 @@ watch(password, () => {
                 </div>
 
                 <div class="footer">
-                    <button class="cancel" type="button">
+                    <button
+                        class="cancel"
+                        type="button"
+                    >
                         <span class="font02 micro02">Cancel</span>
                     </button>
 
-                    <button :class="['submit', submitIsLoading ? 'loading' : '']" type="submit">
+                    <button
+                        :class="['submit', submitIsLoading ? 'loading' : '']"
+                        type="submit"
+                    >
                         <svg
                             v-if="submitIsLoading"
                             width="24"
@@ -199,11 +253,27 @@ watch(password, () => {
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
                         >
-                            <path class="dot01" d="M6 10H2V14H6V10Z" fill="#8F8C8F" />
-                            <path class="dot02" d="M14 10H10V14H14V10Z" fill="#8F8C8F" />
-                            <path class="dot03" d="M22 10H18V14H22V10Z" fill="#8F8C8F" />
+                            <path
+                                class="dot01"
+                                d="M6 10H2V14H6V10Z"
+                                fill="#8F8C8F"
+                            />
+                            <path
+                                class="dot02"
+                                d="M14 10H10V14H14V10Z"
+                                fill="#8F8C8F"
+                            />
+                            <path
+                                class="dot03"
+                                d="M22 10H18V14H22V10Z"
+                                fill="#8F8C8F"
+                            />
                         </svg>
-                        <img v-else src="/images/door-open-arrow-in-green.svg" alt="Door open icon" />
+                        <img
+                            v-else
+                            src="/images/door-open-arrow-in-green.svg"
+                            alt="Door open icon"
+                        />
                         <span class="font02 micro02">Log in</span>
                     </button>
                 </div>
@@ -213,5 +283,5 @@ watch(password, () => {
 </template>
 
 <style scoped lang="scss">
-@use "~/assets/scss/accountSignInPopup.scss";
+    @use "~/assets/scss/accountSignInPopup.scss";
 </style>

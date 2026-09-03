@@ -1,16 +1,12 @@
 <script setup lang="ts">
-    import getUsername from "~/composables/getUsername";
-    import type { Notification } from "~/types/notification";
     import type { Shortcut } from "~/types/shortcut";
 
-    const shortcutCreateIsOpen = ref(false);
-
-    const undoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
-    const redoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
-
-    const shortcuts: Ref<Shortcut[]> = ref([]);
+    const { notifications, stopTimeout, restartTimeout, deleteNotification } = useNotification();
+    const { resetData } = useAppStates();
 
     // Undo & Redo actions
+    const undoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
+    const redoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
 
     function handleUndo() {
         undoAction(undoActions, redoActions, shortcuts);
@@ -24,8 +20,6 @@
     // Sign In
 
     const email = ref("");
-    const username = ref("");
-    const isLoggedIn = ref(false);
     const codeType: Ref<"registration" | "login"> = ref("registration");
 
     const isLoginOpen = ref(false);
@@ -54,57 +48,25 @@
     }
 
     function handleResetData() {
-        resetData(isLoggedIn, username, email);
+        resetData();
+        email.value = "";
     }
 
-    function handleGetUsername() {
-        getUsername(isLoggedIn, username, email, notifications, timeouts);
+    function handleFetchMe() {
+        useFetchMe();
     }
 
     function handleRegister() {
-        getUsername(isLoggedIn, username, email, notifications, timeouts);
+        useFetchMe();
         email.value = "";
     }
 
     // ---
-    // Notifications
-
-    const notifications: {
-        notificationKey: number;
-        title: string;
-        type: "info" | "success" | "error";
-        message: string;
-        isRemove: boolean;
-    }[] = reactive([]);
-    const timeouts: { notificationKey: number; timeout: NodeJS.Timeout }[] = reactive([]);
-
-    function stopTimeout(notificationKey: number) {
-        const timeout = timeouts[timeouts.findIndex((e) => e.notificationKey === notificationKey)];
-
-        clearTimeout(timeout?.timeout);
-
-        timeouts.splice(
-            timeouts.findIndex((e) => e.notificationKey === notificationKey),
-            1,
-        );
-    }
-
-    function restartTimeout(notificationKey: number) {
-        timeouts.push({
-            notificationKey: notificationKey,
-            timeout: removeNotification(notifications, timeouts, notificationKey, 5200),
-        });
-    }
-
-    function deleteNotification(notificationKey: number) {
-        notifications.splice(
-            notifications.findIndex((e) => e.notificationKey === notificationKey),
-            1,
-        );
-    }
-
-    // ---
     // Shortcuts
+
+    const shortcutCreateIsOpen = ref(false);
+
+    const shortcuts: Ref<Shortcut[]> = ref([]);
 
     function handleCreateShortcut(scts: Shortcut[]) {
         const old = shortcuts.value;
@@ -127,7 +89,7 @@
 
     onMounted(async () => {
         if (await checkIsUserConnected()) {
-            handleGetUsername();
+            handleFetchMe();
         }
 
         const shortcutsData = localStorage.getItem("moooboard:shortcuts");
@@ -143,12 +105,10 @@
         <Navbar
             :undo-length="undoActions.length"
             :redo-length="redoActions.length"
-            :username="username"
             @undo="handleUndo"
             @redo="handleRedo"
             @open-login="isLoginOpen = true"
             @log-out="handleResetData()"
-            @notify="(e) => addNotification(notifications, timeouts, e)"
         />
 
         <div class="content">
@@ -181,7 +141,6 @@
             v-if="isLoginOpen"
             @close="isLoginOpen = false"
             @open-register="openRegister()"
-            @notify="(e) => addNotification(notifications, timeouts, e)"
             @submit="(e) => openCode(e)"
         />
 
@@ -189,7 +148,6 @@
             v-if="isRegisterOpen"
             @open-login="openLogin()"
             @close="isRegisterOpen = false"
-            @notify="(e) => addNotification(notifications, timeouts, e)"
             @submit="(e) => openCode(e)"
         />
 
@@ -198,7 +156,6 @@
             :email="email"
             :type="codeType"
             @close="isCodeOpen = false"
-            @notify="(e: Notification) => addNotification(notifications, timeouts, e)"
             @submit="handleRegister()"
         />
 
@@ -227,7 +184,6 @@
                 :title="n.title"
                 :type="n.type"
                 :message="n.message"
-                :is-remove="n.isRemove"
                 @mouseenter="stopTimeout(n.notificationKey)"
                 @mouseleave="restartTimeout(n.notificationKey)"
                 @close="(e) => deleteNotification(e)"

@@ -1,12 +1,12 @@
 <script setup lang="ts">
     import { FetchError } from "ofetch";
-    import type { Notification } from "~/types/notification";
 
     const emit = defineEmits<{
-        (event: "notify", payload: Notification): void;
         (event: "submit"): void;
         (event: "close"): void;
     }>();
+
+    const { addNotification } = useNotification();
 
     const submitIsLoading = ref(false);
 
@@ -31,23 +31,25 @@
                     message: string;
                 } = error.data;
 
-                emit("submit");
-                emit("notify", {
+                addNotification({
                     title: "An error occured",
                     type: "error",
                     message: err.message,
                 });
+
+                emit("submit");
                 emit("close");
 
                 return;
             }
 
-            emit("submit");
-            emit("notify", {
+            addNotification({
                 title: "An error occured",
                 type: "error",
                 message: "An error occured while attempting to revoke your session",
             });
+
+            emit("submit");
             emit("close");
         }
     }

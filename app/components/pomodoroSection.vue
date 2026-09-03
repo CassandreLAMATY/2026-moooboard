@@ -3,6 +3,8 @@
         (event: "openSettings"): void;
     }>();
 
+    const { selectedBuddy, selectedBuddyIsLoading, fetchSelectedBuddy } = useBuddies();
+
     const initFocus = [0, 45, 0];
     const initRelax = [0, 15, 0];
     const hasHours = ref(initFocus[0] === 0 && initRelax[0] === 0 ? false : true);
@@ -130,6 +132,10 @@
 
         initSessionTime();
     }
+
+    onMounted(async () => {
+        await fetchSelectedBuddy();
+    });
 </script>
 
 <template>
@@ -156,15 +162,39 @@
                     :style="{ '--angle': `${gradientAngle}deg` }"
                 ></div>
                 <div class="icon-container">
+                    <svg
+                        v-if="selectedBuddyIsLoading"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            class="dot01"
+                            d="M6 10H2V14H6V10Z"
+                            fill="#8F8C8F"
+                        />
+                        <path
+                            class="dot02"
+                            d="M14 10H10V14H14V10Z"
+                            fill="#8F8C8F"
+                        />
+                        <path
+                            class="dot03"
+                            d="M22 10H18V14H22V10Z"
+                            fill="#8F8C8F"
+                        />
+                    </svg>
                     <img
-                        v-if="isFrame1Displayed"
-                        src="/images/pomodoro/cow01.svg"
-                        alt="Cow icon"
+                        v-else-if="isFrame1Displayed"
+                        :src="`${selectedBuddy.image_base_url}01.svg`"
+                        :alt="selectedBuddy.name"
                     />
                     <img
                         v-else
-                        src="/images/pomodoro/cow02.svg"
-                        alt="Cow icon"
+                        :src="`${selectedBuddy.image_base_url}02.svg`"
+                        :alt="selectedBuddy.name"
                     />
                 </div>
             </div>
