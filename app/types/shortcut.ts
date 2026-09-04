@@ -5,4 +5,5 @@ export type Shortcut = {
     icon: string;
     iconAlt: string;
     color: string;
+    order: number;
 };

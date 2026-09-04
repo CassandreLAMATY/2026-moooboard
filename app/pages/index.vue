@@ -1,20 +1,7 @@
 <script setup lang="ts">
-    import type { Shortcut } from "~/types/shortcut";
-
     const { notifications, stopTimeout, restartTimeout, deleteNotification } = useNotification();
     const { resetData } = useAppStates();
-
-    // Undo & Redo actions
-    const undoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
-    const redoActions: Ref<{ type: string; undoValue: any; currentValue: any }[]> = ref([]);
-
-    function handleUndo() {
-        undoAction(undoActions, redoActions, shortcuts);
-    }
-
-    function handleRedo() {
-        redoAction(redoActions, undoActions, shortcuts);
-    }
+    const { shortcuts } = useShortcuts();
 
     // ---
     // Sign In
@@ -66,22 +53,6 @@
 
     const shortcutCreateIsOpen = ref(false);
 
-    const shortcuts: Ref<Shortcut[]> = ref([]);
-
-    function handleCreateShortcut(scts: Shortcut[]) {
-        const old = shortcuts.value;
-
-        shortcuts.value = scts;
-
-        handleNewAction(undoActions, redoActions, "SCTS", old, scts);
-    }
-
-    function handleDeleteShortcut(scts: Shortcut[], id: number) {
-        shortcuts.value = deleteShortcut(scts, id);
-
-        handleNewAction(undoActions, redoActions, "SCTS", scts, shortcuts.value);
-    }
-
     // ---
     // Pomodoro
 
@@ -103,20 +74,12 @@
 <template>
     <div class="page">
         <Navbar
-            :undo-length="undoActions.length"
-            :redo-length="redoActions.length"
-            @undo="handleUndo"
-            @redo="handleRedo"
             @open-login="isLoginOpen = true"
             @log-out="handleResetData()"
         />
 
         <div class="content">
-            <ShortcutBox
-                v-if="shortcuts.length > 0"
-                :shortcuts="shortcuts"
-                @delete="(e: number) => handleDeleteShortcut(shortcuts, e)"
-            />
+            <ShortcutBox v-if="shortcuts.length > 0" />
 
             <DateSection />
 
@@ -164,7 +127,6 @@
         <ShortcutCreatePopup
             v-if="shortcutCreateIsOpen"
             @close="shortcutCreateIsOpen = false"
-            @submit="(e) => handleCreateShortcut(e)"
         />
 
         <!-- Pomodoro -->

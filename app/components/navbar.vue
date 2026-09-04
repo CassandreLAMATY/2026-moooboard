@@ -1,17 +1,11 @@
 <script setup lang="ts">
-    const props = defineProps<{
-        undoLength: number;
-        redoLength: number;
-    }>();
-
     const emit = defineEmits<{
         (event: "openLogin"): void;
         (event: "logOut"): void;
-        (event: "redo"): void;
-        (event: "undo"): void;
     }>();
 
     const { username } = useAppStates();
+    const { undo, redo, undoAction, redoAction } = useActions();
 
     const profileBtn: Ref<HTMLElement | null> = ref(null);
 
@@ -55,13 +49,13 @@
     <nav>
         <div class="action-container">
             <button
-                :class="`btn-round ${undoLength > 0 ? 'active' : ''}`"
+                :class="`btn-round ${undo.length > 0 ? 'active' : ''}`"
                 type="button"
                 title="Undo"
-                @click="$emit('undo')"
+                @click="undoAction()"
             >
                 <img
-                    v-if="undoLength > 0"
+                    v-if="undo.length > 0"
                     src="/images/arrow-undo.svg"
                     alt="Undo icon"
                 />
@@ -73,13 +67,13 @@
             </button>
 
             <button
-                :class="`btn-round ${redoLength > 0 ? 'active' : ''}`"
+                :class="`btn-round ${redo.length > 0 ? 'active' : ''}`"
                 type="button"
                 title="Redo"
-                @click="$emit('redo')"
+                @click="redoAction()"
             >
                 <img
-                    v-if="redoLength > 0"
+                    v-if="redo.length > 0"
                     src="/images/arrow-redo.svg"
                     alt="Redo icon"
                 />
