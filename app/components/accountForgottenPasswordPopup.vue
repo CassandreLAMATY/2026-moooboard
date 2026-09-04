@@ -3,34 +3,18 @@
     import { signInEmailSchema } from "~/schemas/signInSchemas";
 
     const emit = defineEmits<{
-        (event: "submit", payload: { email: string; type: "login" }): void;
-        (event: "openRegister"): void;
-        (event: "openForgottenPassword"): void;
+        (event: "submit", payload: { email: string; type: "forgotten-password" }): void;
+        (event: "openLogin"): void;
         (event: "close"): void;
     }>();
 
     const { addNotification } = useNotification();
 
     const email = ref("");
-    const password = ref("");
 
     const emailIsValid = ref(false);
-    const passwordIsValid = ref(false);
 
     const emailError = ref("");
-    const passwordError = ref("");
-
-    // Password handling
-
-    const isPasswordDisplayed = ref(false);
-
-    const hasBeenFocus = ref(false);
-    const hasBeenBlur = ref(false);
-
-    function focusPassword() {
-        hasBeenFocus.value = true;
-        passwordError.value = "";
-    }
 
     //---
     // Submit
@@ -40,19 +24,18 @@
     async function submit() {
         if (submitIsLoading.value) return;
 
-        if (emailIsValid.value && password.value.length > 0) {
+        if (emailIsValid.value) {
             try {
                 submitIsLoading.value = true;
 
-                await $fetch("/api/loginSendCodeHandler", {
+                await $fetch("/api/forgottenPasswordSendCodeHandler", {
                     method: "POST",
                     body: {
                         email: email.value,
-                        password: password.value,
                     },
                 });
 
-                emit("submit", { email: email.value, type: "login" });
+                emit("submit", { email: email.value, type: "forgotten-password" });
             } catch (error) {
                 submitIsLoading.value = false;
 
@@ -83,11 +66,6 @@
             return;
         }
 
-        if (password.value.length === 0) {
-            passwordIsValid.value = false;
-            passwordError.value = "This field must contain a valid password";
-        }
-
         checkField(email.value, emailError, "email");
 
         return;
@@ -100,14 +78,6 @@
             emailIsValid.value = true;
         } catch (error) {
             emailIsValid.value = false;
-        }
-    });
-
-    watch(password, () => {
-        try {
-            passwordIsValid.value = true;
-        } catch (error) {
-            passwordIsValid.value = false;
         }
     });
 </script>
@@ -123,7 +93,7 @@
         >
             <div class="header-container">
                 <div class="header">
-                    <span class="font04 silk01">Sign in</span>
+                    <span class="font04 silk01">Forgotten password</span>
 
                     <button
                         type="button"
@@ -137,12 +107,7 @@
                 </div>
 
                 <span class="font02 micro02">
-                    Don’t have an account yet ?
-                    <span
-                        class="login"
-                        @click="$emit('openRegister')"
-                        >Create one here</span
-                    >
+                    Don’t worry, we’re here to help, we’ll send you a code by email to confirm your identity first.
                 </span>
             </div>
 
@@ -182,70 +147,13 @@
 
                         <span class="font05">{{ emailError }}</span>
                     </div>
-
-                    <div class="password-container">
-                        <div class="container">
-                            <div class="input-container">
-                                <div class="input-header">
-                                    <label
-                                        class="font06 silk02"
-                                        for="password"
-                                    >
-                                        <span>*</span> Password
-                                    </label>
-
-                                    <button
-                                        type="button"
-                                        @click="isPasswordDisplayed = !isPasswordDisplayed"
-                                    >
-                                        <img
-                                            v-if="!isPasswordDisplayed"
-                                            src="/images/eye.svg"
-                                            alt="Eye icon"
-                                        />
-                                        <img
-                                            v-else
-                                            src="/images/eye-close.svg"
-                                            alt="Closed eye icon"
-                                        />
-                                    </button>
-                                </div>
-
-                                <div class="input">
-                                    <input
-                                        class="font07"
-                                        :type="isPasswordDisplayed ? 'text' : 'password'"
-                                        name="password"
-                                        id="password"
-                                        v-model="password"
-                                        @focus="focusPassword()"
-                                        @blur="hasBeenBlur = true"
-                                    />
-                                    <img
-                                        v-if="passwordError"
-                                        src="/images/xmark-red.svg"
-                                        alt="Xmark icon"
-                                    />
-                                </div>
-                            </div>
-
-                            <span class="font05">{{ passwordError }}</span>
-                        </div>
-
-                        <button
-                            type="button"
-                            @click="$emit('openForgottenPassword')"
-                        >
-                            <span class="font05">Help, I forgot my password...</span>
-                        </button>
-                    </div>
                 </div>
 
                 <div class="footer">
                     <button
                         class="cancel"
                         type="button"
-                        @click="$emit('close')"
+                        @click="$emit('openLogin')"
                     >
                         <span class="font02 micro02">Cancel</span>
                     </button>
@@ -280,10 +188,10 @@
                         </svg>
                         <img
                             v-else
-                            src="/images/door-open-arrow-in-green.svg"
+                            src="/images/check-light-green-24.svg"
                             alt="Door open icon"
                         />
-                        <span class="font02 micro02">Log in</span>
+                        <span class="font02 micro02">Next</span>
                     </button>
                 </div>
             </form>

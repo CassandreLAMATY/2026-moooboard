@@ -2,12 +2,13 @@
     import { FetchError } from "ofetch";
 
     const props = defineProps<{
-        type: "registration" | "login";
+        type: "registration" | "login" | "forgotten-password";
         email: string;
     }>();
 
     const emit = defineEmits<{
         (event: "submit"): void;
+        (event: "openUpdatePassword"): void;
         (event: "close"): void;
     }>();
 
@@ -102,14 +103,28 @@
         handleTimer();
 
         try {
-            await $fetch("/api/registerResendCodeHandler", {
-                method: "POST",
-            });
+            if (props.type === "registration") {
+                await $fetch("/api/registerResendCodeHandler", {
+                    method: "POST",
+                });
+            }
+
+            if (props.type === "login") {
+                await $fetch("/api/loginResendCodeHandler", {
+                    method: "POST",
+                });
+            }
+
+            if (props.type === "forgotten-password") {
+                await $fetch("/api/forgottenPasswordResendCodeHandler", {
+                    method: "POST",
+                });
+            }
 
             addNotification({
                 title: "Code successfully resent",
                 type: "success",
-                message: "Registration code was successfully sent to the provided email address.",
+                message: "A verification code was successfully sent to the provided email address.",
             });
         } catch (error) {
             if (error instanceof FetchError) {
@@ -132,7 +147,7 @@
             addNotification({
                 title: "An error occured",
                 type: "error",
-                message: "An error occured while attempting to verify your account. Please, try again later.",
+                message: "An error occured while attempting to send a new code. Please, try again later.",
             });
 
             emit("close");
@@ -163,6 +178,8 @@
 
         if (submitIsLoading.value || !code) return;
 
+        submitIsLoading.value = true;
+
         try {
             if (props.type === "registration") {
                 await $fetch("/api/registerVerificationHandler", {
@@ -171,6 +188,19 @@
                         code: code,
                     },
                 });
+            }
+
+            if (props.type === "forgotten-password") {
+                await $fetch("/api/forgottenPasswordVerificationHandler", {
+                    method: "POST",
+                    body: {
+                        code: code,
+                    },
+                });
+
+                emit("openUpdatePassword");
+                emit("close");
+                return;
             }
 
             if (props.type === "login") {
@@ -185,6 +215,8 @@
             emit("submit");
             emit("close");
         } catch (error) {
+            submitIsLoading.value = false;
+
             if (error instanceof FetchError) {
                 const err: {
                     ok: boolean;
@@ -192,7 +224,11 @@
                     code: string | undefined;
                 } = error.data;
 
-                if ((err.code && err.code === "E07020") || (err.code && err.code === "E08020")) {
+                if (
+                    (err.code && err.code === "E07020") ||
+                    (err.code && err.code === "E08020") ||
+                    (err.code && err.code === "E10020")
+                ) {
                     isCodeError.value = true;
 
                     addNotification({
@@ -240,7 +276,13 @@
             <div class="header-container">
                 <div class="header">
                     <span class="font04 silk01">
-                        {{ type === "registration" ? "Confirm email address" : "Login confirmation" }}
+                        {{
+                            type === "registration"
+                                ? "Confirm email address"
+                                : type === "forgotten-password"
+                                  ? "Forgotten password"
+                                  : "Login confirmation"
+                        }}
                     </span>
 
                     <button
@@ -338,16 +380,25 @@
                             />
                         </svg>
                         <img
-                            v-else-if="submitIsAllowed"
+                            v-else-if="submitIsAllowed && type !== 'forgotten-password'"
                             src="/images/door-open-arrow-in-green.svg"
                             alt="Door open icon"
                         />
                         <img
-                            v-else
+                            v-else-if="type !== 'forgotten-password'"
                             src="/images/door-open-arrow-in-grayed.svg"
                             alt="Door open icon"
                         />
-                        <span class="font02 micro02">{{ type === "registration" ? "Register" : "Log in" }}</span>
+                        <img
+                            v-else
+                            src="/images/check-light-green-24.svg"
+                            alt="Check icon"
+                        />
+                        <span class="font02 micro02">
+                            {{
+                                type === "registration" ? "Register" : type === "forgotten-password" ? "Next" : "Log in"
+                            }}
+                        </span>
                     </button>
                 </div>
             </form>

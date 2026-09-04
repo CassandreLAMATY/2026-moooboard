@@ -7,20 +7,6 @@ const schema = z.object({
     email: z
         .email({ error: "Field email must contain a valid email address" })
         .max(256, { error: "Field email must contain at most 256 characters" }),
-
-    password: z
-        .string({
-            error: 'Field password must be of type "string"',
-        })
-        .min(8, {
-            error: "Field password must contain at least 8 characters",
-        })
-        .max(32, {
-            error: "Field password must contain at most 32 characters",
-        })
-        .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[_#?!@$%^&*-])[a-zA-Z0-9_#?!@$%^&*-]+$/, {
-            error: "Field password can only contain letters, numbers, and _#?!@$%^&*-",
-        }),
 });
 
 export default defineEventHandler(async (event) => {
@@ -44,13 +30,12 @@ export default defineEventHandler(async (event) => {
                     ? parseBody.error.issues[0].path[0]
                     : parseBody.error.issues[0]
                       ? parseBody.error.issues[0].message
-                      : "Invalid login form",
+                      : "Invalid forgotten password form",
         };
     }
 
     const reqBody = {
         email: parseBody.data.email,
-        password: parseBody.data.password,
         app_source: {
             name: config.appName,
             email: config.appEmail,
@@ -65,12 +50,12 @@ export default defineEventHandler(async (event) => {
                 data: {
                     uuid: string;
                 };
-            } = await $fetch(`${config.backendBaseUrl}/auth/login/send-code`, {
+            } = await $fetch(`${config.backendBaseUrl}/account/update/password/forgotten/send-code`, {
                 method: "POST",
                 body: reqBody,
             });
 
-            setCookie(event, "authentication_uuid", data.data.uuid, {
+            setCookie(event, "forgotten_password_uuid", data.data.uuid, {
                 httpOnly: true,
                 secure: config.nodeEnv === "production",
                 path: "/",

@@ -2,33 +2,33 @@ import { UAParser } from "ua-parser-js";
 import z from "zod";
 import { Exception } from "../core/errors/Exception";
 import handleError from "../middlewares/handleError";
+import requirePasswordToken from "../middlewares/requirePasswordToken";
 const config = useRuntimeConfig();
 
 const schema = z.object({
-    code: z
+    new_password: z
         .string({
-            error: `Field code must be of type "string"`,
+            error: 'Field password must be of type "string"',
         })
-        .length(6, {
-            error: `Field code must contain 6 digits`,
+        .min(8, {
+            error: "Field password must contain at least 8 characters",
         })
-        .regex(/^[0-9]{6}$/, {
-            error: `Field code must contain 6 digits`,
+        .max(32, {
+            error: "Field password must contain at most 32 characters",
+        })
+        .regex(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[_#?!@$%^&*-])[a-zA-Z0-9_#?!@$%^&*-]+$/, {
+            error: "Field password can only contain letters, numbers, and _#?!@$%^&*-",
         }),
 });
 
-const uuidSchema = z.uuidv4({
-    error: `You must provide a valid authentication UUID`,
-});
-
 export default defineEventHandler(async (event) => {
-    if (event.node.req.method !== "POST") {
+    if (event.node.req.method !== "PUT") {
         setResponseStatus(event, 405);
 
         return { ok: false, disconnected: false, message: "Method not authorized" };
     }
 
-    // Body (code)
+    // Body (password)
 
     const body = await readBody(event);
     const parseBody = schema.safeParse(body);
@@ -39,40 +39,7 @@ export default defineEventHandler(async (event) => {
         return {
             ok: false,
             disconnected: false,
-            message: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid code",
-        };
-    }
-
-    // UUID
-
-    const uuid = getCookie(event, "authentication_uuid");
-
-    if (!uuid) {
-        setResponseStatus(event, 400);
-
-        return {
-            ok: false,
-            disconnected: false,
-            message: "Please log in first or use the link in the email you received to proceed",
-        };
-    }
-
-    const parseUuid = uuidSchema.safeParse(uuid);
-
-    if (!parseUuid.success) {
-        setResponseStatus(event, 400);
-
-        deleteCookie(event, "authentication_uuid");
-
-        return {
-            ok: false,
-            disconnected: true,
-            message:
-                parseUuid.error.issues[0] && parseUuid.error.issues[0].path[0]
-                    ? parseUuid.error.issues[0].path[0]
-                    : parseUuid.error.issues[0]
-                      ? parseUuid.error.issues[0].message
-                      : "Invalid request",
+            message: parseBody.error.issues[0] ? parseBody.error.issues[0].path[0] : "Invalid new password",
         };
     }
 
@@ -83,8 +50,7 @@ export default defineEventHandler(async (event) => {
     const { browser, device } = UAParser(userAgent);
 
     const reqBody = {
-        uuid: parseUuid.data,
-        code: parseBody.data.code,
+        new_password: parseBody.data.new_password,
         browser: browser.name,
         device: device.is("mobile") ? "Mobile" : "Desktop",
         app_source: {
@@ -94,6 +60,8 @@ export default defineEventHandler(async (event) => {
     };
 
     try {
+        const passwordToken = requirePasswordToken(event);
+
         return await handleError(event, async () => {
             const data: {
                 ok: boolean;
@@ -102,12 +70,15 @@ export default defineEventHandler(async (event) => {
                     refresh_token: string;
                     access_token: string;
                 };
-            } = await $fetch(`${config.backendBaseUrl}/auth/login`, {
-                method: "POST",
+            } = await $fetch(`${config.backendBaseUrl}/account/update/password/forgotten`, {
+                method: "PUT",
+                headers: {
+                    authorization: `Bearer ${passwordToken}`,
+                },
                 body: reqBody,
             });
 
-            deleteCookie(event, "authentication_uuid");
+            deleteCookie(event, "password_token");
 
             setCookie(event, "access_token", data.data.access_token, {
                 httpOnly: true,

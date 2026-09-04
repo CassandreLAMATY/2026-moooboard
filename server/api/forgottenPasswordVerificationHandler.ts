@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
 
     // UUID
 
-    const uuid = getCookie(event, "authentication_uuid");
+    const uuid = getCookie(event, "forgotten_password_uuid");
 
     if (!uuid) {
         setResponseStatus(event, 400);
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         return {
             ok: false,
             disconnected: false,
-            message: "Please log in first or use the link in the email you received to proceed",
+            message: "Please restart the procedure and follow every step properly",
         };
     }
 
@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
     if (!parseUuid.success) {
         setResponseStatus(event, 400);
 
-        deleteCookie(event, "authentication_uuid");
+        deleteCookie(event, "forgotten_password_uuid");
 
         return {
             ok: false,
@@ -76,21 +76,9 @@ export default defineEventHandler(async (event) => {
         };
     }
 
-    // Browser & device
-
-    const userAgent = getRequestHeader(event, "user-agent");
-
-    const { browser, device } = UAParser(userAgent);
-
     const reqBody = {
         uuid: parseUuid.data,
         code: parseBody.data.code,
-        browser: browser.name,
-        device: device.is("mobile") ? "Mobile" : "Desktop",
-        app_source: {
-            name: config.appName,
-            email: config.appEmail,
-        },
     };
 
     try {
@@ -99,30 +87,21 @@ export default defineEventHandler(async (event) => {
                 ok: boolean;
                 message: string;
                 data: {
-                    refresh_token: string;
-                    access_token: string;
+                    password_token: string;
                 };
-            } = await $fetch(`${config.backendBaseUrl}/auth/login`, {
+            } = await $fetch(`${config.backendBaseUrl}/account/update/password/forgotten/verification`, {
                 method: "POST",
                 body: reqBody,
             });
 
-            deleteCookie(event, "authentication_uuid");
+            deleteCookie(event, "forgotten_password_uuid");
 
-            setCookie(event, "access_token", data.data.access_token, {
+            setCookie(event, "password_token", data.data.password_token, {
                 httpOnly: true,
                 secure: config.nodeEnv === "production",
                 path: "/",
                 sameSite: "strict",
                 maxAge: 60 * 15,
-            });
-
-            setCookie(event, "refresh_token", data.data.refresh_token, {
-                httpOnly: true,
-                secure: config.nodeEnv === "production",
-                path: "/",
-                sameSite: "strict",
-                maxAge: 60 * 60 * 24 * 30,
             });
 
             setResponseStatus(event, 200);

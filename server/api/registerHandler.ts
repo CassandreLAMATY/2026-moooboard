@@ -91,6 +91,7 @@ export default defineEventHandler(async (event) => {
 
             return {
                 ok: true,
+                disconnected: false,
                 message: data.message,
             };
         });

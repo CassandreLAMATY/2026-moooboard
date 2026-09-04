@@ -2,20 +2,11 @@ import { FetchError } from "ofetch";
 import type { Buddy } from "~/types/buddy";
 
 export default function useBuddies() {
-    const defaultBuddy = useState<Buddy>("defaultBuddy", () => {
-        return {
-            id: 1,
-            name: "Hungry Cow",
-            formatted_name: "hungry-cow",
-            image_base_url: "/images/pomodoro/cow",
-        };
-    });
-    const selectedBuddy = useState<Buddy>("selectedBuddy", () => defaultBuddy.value);
     const selectedBuddyIsLoading = useState<boolean>("selectedBuddyIsLoading", () => true);
     const buddies = useState<Buddy[]>("buddies", () => []);
     const isLoaded = useState("buddiesLoaded", () => false);
 
-    const { isLoggedIn, resetData } = useAppStates();
+    const { isLoggedIn, selectedBuddy, defaultBuddy, resetData } = useAppStates();
     const { addNotification } = useNotification();
 
     async function fetchBuddies(force = false) {
@@ -54,10 +45,15 @@ export default function useBuddies() {
     async function fetchSelectedBuddy() {
         if (!isLoggedIn.value) {
             const buddyId = localStorage.getItem("moooboard:buddy");
-            if (!buddyId) return;
+            if (!buddyId) {
+                selectedBuddyIsLoading.value = false;
+                return;
+            }
 
             const parsedBuddyId = Number.parseInt(buddyId);
             if (Number.isNaN(parsedBuddyId)) {
+                selectedBuddyIsLoading.value = false;
+
                 addNotification({
                     title: "An error occured",
                     type: "error",
@@ -78,6 +74,7 @@ export default function useBuddies() {
 
                 return;
             } catch (error) {
+                console.log(error);
                 if (error instanceof FetchError) {
                     const err: {
                         ok: boolean;
@@ -167,6 +164,10 @@ export default function useBuddies() {
         }
     }
 
+    function resetBuddy() {
+        selectedBuddy.value = defaultBuddy.value;
+    }
+
     return {
         defaultBuddy,
         selectedBuddy,
@@ -176,5 +177,6 @@ export default function useBuddies() {
         fetchBuddies,
         fetchSelectedBuddy,
         updateSelectedBuddy,
+        resetBuddy,
     };
 }

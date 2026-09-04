@@ -1,4 +1,6 @@
 <script setup lang="ts">
+    import AccountLogInPopup from "~/components/accountLogInPopup.vue";
+
     const { notifications, stopTimeout, restartTimeout, deleteNotification } = useNotification();
     const { resetData } = useAppStates();
     const { shortcuts } = useShortcuts();
@@ -7,31 +9,55 @@
     // Sign In
 
     const email = ref("");
-    const codeType: Ref<"registration" | "login"> = ref("registration");
+    const codeType: Ref<"registration" | "login" | "forgotten-password"> = ref("registration");
 
     const isLoginOpen = ref(false);
     const isRegisterOpen = ref(false);
+    const isForgottenPasswordOpen = ref(false);
     const isCodeOpen = ref(false);
+    const isUpdatePasswordOpen = ref(false);
 
     function openLogin() {
         isLoginOpen.value = true;
         isRegisterOpen.value = false;
         isCodeOpen.value = false;
+        isForgottenPasswordOpen.value = false;
+        isUpdatePasswordOpen.value = false;
     }
 
     function openRegister() {
         isLoginOpen.value = false;
         isRegisterOpen.value = true;
         isCodeOpen.value = false;
+        isForgottenPasswordOpen.value = false;
+        isUpdatePasswordOpen.value = false;
     }
 
-    function openCode(data: { email: string; type: "registration" | "login" }) {
+    function openCode(data: { email: string; type: "registration" | "login" | "forgotten-password" }) {
         email.value = data.email;
         codeType.value = data.type;
 
         isLoginOpen.value = false;
         isRegisterOpen.value = false;
         isCodeOpen.value = true;
+        isForgottenPasswordOpen.value = false;
+        isUpdatePasswordOpen.value = false;
+    }
+
+    function openForgottenPassword() {
+        isLoginOpen.value = false;
+        isRegisterOpen.value = false;
+        isCodeOpen.value = false;
+        isForgottenPasswordOpen.value = true;
+        isUpdatePasswordOpen.value = false;
+    }
+
+    function openUpdatePassword() {
+        isLoginOpen.value = false;
+        isRegisterOpen.value = false;
+        isCodeOpen.value = false;
+        isForgottenPasswordOpen.value = false;
+        isUpdatePasswordOpen.value = true;
     }
 
     function handleResetData() {
@@ -43,7 +69,7 @@
         useFetchMe();
     }
 
-    function handleRegister() {
+    function handleCodeSubmit() {
         useFetchMe();
         email.value = "";
     }
@@ -104,6 +130,7 @@
             v-if="isLoginOpen"
             @close="isLoginOpen = false"
             @open-register="openRegister()"
+            @open-forgotten-password="openForgottenPassword()"
             @submit="(e) => openCode(e)"
         />
 
@@ -114,12 +141,25 @@
             @submit="(e) => openCode(e)"
         />
 
+        <AccountForgottenPasswordPopup
+            v-if="isForgottenPasswordOpen"
+            @open-login="openLogin()"
+            @submit="(e) => openCode(e)"
+        />
+
         <AccountCodePopup
             v-if="isCodeOpen"
             :email="email"
             :type="codeType"
             @close="isCodeOpen = false"
-            @submit="handleRegister()"
+            @submit="handleCodeSubmit()"
+            @open-update-password="openUpdatePassword()"
+        />
+
+        <AccountUpdatePasswordPopup
+            v-if="isUpdatePasswordOpen"
+            @open-login="openLogin()"
+            @close="isUpdatePasswordOpen = false"
         />
 
         <!-- Shortcuts -->

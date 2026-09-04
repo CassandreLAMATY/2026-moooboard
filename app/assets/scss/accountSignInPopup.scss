@@ -111,6 +111,18 @@
                             }
                         }
                     }
+
+                    & > button {
+                        all: unset;
+
+                        cursor: pointer;
+
+                        & > span {
+                            font-size: s.$size-01;
+                            color: c.$light-blue;
+                            text-decoration: underline;
+                        }
+                    }
                 }
 
                 & .container {

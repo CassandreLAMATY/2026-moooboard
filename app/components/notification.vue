@@ -9,10 +9,18 @@
     const emit = defineEmits<{
         (event: "close", payload: number): void;
     }>();
+
+    const isRemove = ref(false);
+
+    onMounted(() => {
+        setTimeout(() => {
+            isRemove.value = true;
+        }, 200);
+    });
 </script>
 
 <template>
-    <div :class="['notification', type, 'remove']">
+    <div :class="['notification', type, isRemove ? 'remove' : '']">
         <div class="header">
             <span class="font04 silk01">{{ title }}</span>
 
