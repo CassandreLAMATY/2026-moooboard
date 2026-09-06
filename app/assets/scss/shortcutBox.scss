@@ -42,8 +42,23 @@
 
         background-color: c.$black-01;
 
+        border: 1px solid c.$black-02;
         border-radius: 100%;
 
         cursor: pointer;
+
+        & > img {
+            transition: 0.2s;
+        }
+
+        &:hover {
+            border: 1px solid c.$black-03;
+        }
+
+        &.active {
+            & > img {
+                transform: rotate(-180deg);
+            }
+        }
     }
 }
